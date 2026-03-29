@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             // Note: Update URL if hosted elsewhere. Defaults to FastAPI backend.
-            const response = await fetch("http://localhost:8000/api/review/", {
+            const response = await fetch("https://autopsy-ai.onrender.com/api/review/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ code: code, language: lang })
