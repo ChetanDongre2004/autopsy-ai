@@ -15,7 +15,7 @@ load_dotenv()
 # Detect Provider based on available API Keys
 def get_runtime_ai_config() -> dict:
     if os.getenv("GEMINI_API_KEY"):
-        return {"provider": "gemini", "api_key_configured": True, "model": os.getenv("GEMINI_MODEL", "gemini-2.5-flash"), "configured_key_count": 1}
+        return {"provider": "gemini", "api_key_configured": True, "model": os.getenv("GEMINI_MODEL", "gemini-1.5-flash"), "configured_key_count": 1}
     elif os.getenv("OPENAI_API_KEY"):
         return {"provider": "openai", "api_key_configured": True, "model": os.getenv("OPENAI_MODEL", "gpt-4o"), "configured_key_count": 1}
     elif os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_API_KEYS"):
