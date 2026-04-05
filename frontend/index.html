@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autopsy AI — Code Review, Test Generator & Security Audit</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+
+    <style>
+    /* ══════════════════════════════════════════════════════
+       DESIGN SYSTEM — CSS Variables
+       ══════════════════════════════════════════════════════ */
+    :root {
+        --bg-base:        #0a0a0f;
+        --bg-surface:     #111118;
+        --bg-elevated:    #18181f;
+        --bg-card:        #1e1e28;
+        --bg-input:       #13131a;
+        --border:         #2a2a38;
+        --border-subtle:  #1f1f2b;
+        --text-primary:   #e8e8f0;
+        --text-secondary: #9898b0;
+        --text-muted:     #5c5c78;
+        --accent:         #6c63ff;
+        --accent-dim:     #6c63ff25;
+        --accent-border:  #6c63ff50;
+        --green:          #22c55e;
+        --green-dim:      #22c55e20;
+        --yellow:         #eab308;
+        --yellow-dim:     #eab30820;
+        --red:            #ef4444;
+        --red-dim:        #ef444420;
+        --purple:         #a855f7;
+        --purple-dim:     #a855f720;
+        --blue:           #3b82f6;
+        --blue-dim:       #3b82f620;
+        --orange:         #f97316;
+
+        --radius-sm:  4px;
+        --radius:     8px;
+        --radius-lg:  12px;
+        --radius-xl:  16px;
+
+        --font-ui:   'Syne', sans-serif;
+        --font-code: 'JetBrains Mono', monospace;
+
+        --shadow-sm: 0 1px 3px rgba(0,0,0,.4);
+        --shadow:    0 4px 16px rgba(0,0,0,.5);
+        --shadow-lg: 0 8px 32px rgba(0,0,0,.6);
+    }
+
+    [data-theme="light"] {
+        --bg-base:        #f0f0f8;
+        --bg-surface:     #ffffff;
+        --bg-elevated:    #f8f8ff;
+        --bg-card:        #ffffff;
+        --bg-input:       #f4f4fc;
+        --border:         #dddde8;
+        --border-subtle:  #eeeef6;
+        --text-primary:   #1a1a2e;
+        --text-secondary: #5a5a78;
+        --text-muted:     #9090a8;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       RESET & BASE
+       ══════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { height: 100%; }
+
+    body {
+        font-family: var(--font-ui);
+        background: var(--bg-base);
+        color: var(--text-primary);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       TOP NAV
+       ══════════════════════════════════════════════════════ */
+    .navbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        height: 52px;
+        background: var(--bg-surface);
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
+        z-index: 100;
+    }
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        font-size: 1rem;
+        letter-spacing: -0.3px;
+    }
+    .logo svg { width: 20px; height: 20px; color: var(--accent); }
+    .badge {
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 2px 10px;
+        border-radius: 20px;
+        background: var(--accent-dim);
+        color: var(--accent);
+        border: 1px solid var(--accent-border);
+        letter-spacing: 0.2px;
+    }
+    .nav-right { display: flex; align-items: center; gap: 8px; }
+    .icon-btn {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+        padding: 6px 14px;
+        border-radius: var(--radius);
+        cursor: pointer;
+        font-family: var(--font-ui);
+        font-size: 0.78rem;
+        font-weight: 500;
+        transition: all 0.15s;
+    }
+    .icon-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+
+    /* ══════════════════════════════════════════════════════
+       WEEK TABS
+       ══════════════════════════════════════════════════════ */
+    .week-tabs {
+        display: flex;
+        gap: 6px;
+        padding: 10px 20px;
+        background: var(--bg-surface);
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
+    }
+    .week-tab {
+        padding: 7px 18px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-family: var(--font-ui);
+        font-size: 0.8rem;
+        font-weight: 600;
+        transition: all 0.15s;
+        letter-spacing: 0.1px;
+    }
+    .week-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .week-tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+    /* ══════════════════════════════════════════════════════
+       DASHBOARD LAYOUT — 3-column grid
+       ══════════════════════════════════════════════════════ */
+    .dashboard {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 280px 1fr 340px;
+        overflow: hidden;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       SIDEBAR (left column)
+       ══════════════════════════════════════════════════════ */
+    .sidebar {
+        background: var(--bg-surface);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .sidebar-header {
+        padding: 14px 16px 10px;
+        border-bottom: 1px solid var(--border-subtle);
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+    }
+    .input-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 14px 16px;
+        overflow-y: auto;
+    }
+    label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        letter-spacing: 0.3px;
+    }
+    select, input[type="text"] {
+        width: 100%;
+        padding: 8px 10px;
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--text-primary);
+        font-family: var(--font-ui);
+        font-size: 0.82rem;
+        outline: none;
+        transition: border-color 0.15s;
+        appearance: none;
+    }
+    select:focus, input[type="text"]:focus { border-color: var(--accent); }
+
+    textarea {
+        width: 100%;
+        flex: 1;
+        min-height: 160px;
+        padding: 10px;
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--text-primary);
+        font-family: var(--font-code);
+        font-size: 0.76rem;
+        line-height: 1.6;
+        resize: none;
+        outline: none;
+        transition: border-color 0.15s;
+    }
+    textarea:focus { border-color: var(--accent); }
+    textarea::placeholder { color: var(--text-muted); }
+
+    /* Depth selector pills */
+    .depth-pills { display: flex; gap: 6px; }
+    .depth-pill {
+        flex: 1;
+        padding: 6px 8px;
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--text-muted);
+        font-family: var(--font-ui);
+        font-size: 0.72rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.15s;
+    }
+    .depth-pill.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+    .depth-pill:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
+    /* Toggle options */
+    .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+    }
+    .toggle {
+        position: relative;
+        width: 34px;
+        height: 18px;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+        position: absolute;
+        inset: 0;
+        background: var(--border);
+        border-radius: 20px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .toggle-slider::before {
+        content: "";
+        position: absolute;
+        width: 12px; height: 12px;
+        left: 3px; top: 3px;
+        background: white;
+        border-radius: 50%;
+        transition: 0.2s;
+    }
+    .toggle input:checked + .toggle-slider { background: var(--accent); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+    /* Primary button */
+    .primary-btn {
+        width: 100%;
+        padding: 10px;
+        background: var(--accent);
+        border: none;
+        border-radius: var(--radius);
+        color: white;
+        font-family: var(--font-ui);
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.15s;
+        letter-spacing: 0.2px;
+        margin-top: auto;
+    }
+    .primary-btn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
+    .primary-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    /* Spinner */
+    .spinner {
+        width: 14px; height: 14px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        display: none;
+    }
+    .spinner.visible { display: block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ══════════════════════════════════════════════════════
+       MIDDLE — Code Viewer
+       ══════════════════════════════════════════════════════ */
+    .code-pane {
+        background: var(--bg-base);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        border-right: 1px solid var(--border);
+    }
+    .pane-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 16px;
+        background: var(--bg-surface);
+        border-bottom: 1px solid var(--border);
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        letter-spacing: 0.3px;
+        flex-shrink: 0;
+    }
+    .file-chip {
+        font-family: var(--font-code);
+        font-size: 0.72rem;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        padding: 2px 8px;
+        border-radius: var(--radius-sm);
+        color: var(--text-muted);
+    }
+    .code-scroll {
+        flex: 1;
+        overflow: auto;
+        padding: 16px;
+    }
+    .code-scroll pre {
+        margin: 0;
+        font-family: var(--font-code);
+        font-size: 0.78rem;
+        line-height: 1.7;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       RIGHT PANEL — Results
+       ══════════════════════════════════════════════════════ */
+    .results-panel {
+        background: var(--bg-surface);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .results-scroll {
+        flex: 1;
+        overflow-y: auto;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* Empty state */
+    .empty-state {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 40px 20px;
+        text-align: center;
+    }
+    .empty-icon {
+        font-size: 2.5rem;
+        filter: grayscale(1);
+        opacity: 0.4;
+    }
+    .empty-state p {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        max-width: 180px;
+        line-height: 1.6;
+    }
+
+    /* ─── Week 1 Review Results ─── */
+    .score-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+    }
+    .grade-circle {
+        width: 56px; height: 56px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.4rem; font-weight: 800;
+        color: white; flex-shrink: 0;
+        background: var(--text-muted);
+    }
+    .score-details h2 { font-size: 1.1rem; font-weight: 700; }
+    .score-details p  { font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px; line-height: 1.4; }
+
+    .metrics-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+    .metric-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 10px 8px;
+        text-align: center;
+    }
+    .metric-value { font-size: 1.3rem; font-weight: 800; }
+    .metric-label { font-size: 0.68rem; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .metric-card.red   .metric-value { color: var(--red); }
+    .metric-card.yellow .metric-value { color: var(--yellow); }
+    .metric-card.blue  .metric-value { color: var(--blue); }
+
+    .section-title {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+    }
+
+    .issue-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 10px 12px;
+        border-left: 3px solid var(--border);
+        margin-bottom: 6px;
+    }
+    .issue-card[data-severity="critical"] { border-left-color: var(--red); }
+    .issue-card[data-severity="warning"]  { border-left-color: var(--yellow); }
+    .issue-card[data-severity="info"]     { border-left-color: var(--blue); }
+
+    .issue-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+    }
+    .issue-type {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .issue-line {
+        font-family: var(--font-code);
+        font-size: 0.68rem;
+        color: var(--text-muted);
+        background: var(--bg-elevated);
+        padding: 1px 6px;
+        border-radius: 4px;
+    }
+    .issue-desc    { font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 4px; }
+    .issue-fix     { font-size: 0.75rem; color: var(--green); }
+
+    .positives-list { list-style: none; }
+    .positives-list li {
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        padding: 4px 0 4px 14px;
+        position: relative;
+    }
+    .positives-list li::before { content: "✓"; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+
+    /* ── Week 2 Test Results ── */
+    .test-summary-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 14px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .test-count-circle {
+        width: 58px; height: 58px;
+        border-radius: 50%;
+        background: var(--blue);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.4rem; font-weight: 800;
+        color: white; flex-shrink: 0;
+    }
+    .test-meta h2 { font-size: 0.95rem; font-weight: 700; }
+    .test-meta p  { font-size: 0.76rem; color: var(--text-secondary); margin-top: 2px; }
+    .test-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+    .test-badge {
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-size: 0.68rem;
+        font-weight: 700;
+    }
+    .badge-framework { background: var(--blue-dim);   color: var(--blue);   border: 1px solid #3b82f640; }
+    .badge-coverage  { background: var(--green-dim);  color: var(--green);  border: 1px solid #22c55e40; }
+    .badge-lang      { background: var(--purple-dim); color: var(--purple); border: 1px solid #a855f740; }
+
+    /* Coverage bar */
+    .coverage-bar-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px 14px;
+    }
+    .coverage-bar-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+    }
+    .coverage-pct { font-weight: 700; color: var(--text-primary); }
+    .coverage-bar-track {
+        height: 6px;
+        background: var(--bg-elevated);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+    .coverage-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--blue), var(--accent));
+        border-radius: 3px;
+        transition: width 0.6s ease;
+    }
+
+    /* Breakdown pills */
+    .breakdown-row {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    .breakdown-pill {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        font-size: 0.75rem;
+    }
+    .breakdown-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .breakdown-pill span { color: var(--text-secondary); }
+    .breakdown-pill strong { color: var(--text-primary); }
+
+    /* Test case cards */
+    .test-case-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 10px 12px;
+        border-left: 3px solid var(--border);
+        margin-bottom: 6px;
+        cursor: pointer;
+        transition: border-color 0.15s, background 0.15s;
+    }
+    .test-case-card:hover { background: var(--bg-elevated); }
+    .test-case-card[data-type="happy_path"]  { border-left-color: var(--green); }
+    .test-case-card[data-type="edge_case"]   { border-left-color: var(--yellow); }
+    .test-case-card[data-type="error_case"]  { border-left-color: var(--red); }
+    .test-case-card[data-type="security"]    { border-left-color: var(--purple); }
+
+    .test-case-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+    .test-case-name {
+        font-family: var(--font-code);
+        font-size: 0.72rem;
+        color: var(--text-primary);
+        word-break: break-all;
+        line-height: 1.4;
+    }
+    .type-badge {
+        font-size: 0.65rem;
+        padding: 2px 7px;
+        border-radius: 12px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        font-weight: 700;
+    }
+    .type-happy_path { background: var(--green-dim);  color: var(--green); }
+    .type-edge_case  { background: var(--yellow-dim); color: var(--yellow); }
+    .type-error_case { background: var(--red-dim);    color: var(--red); }
+    .type-security   { background: var(--purple-dim); color: var(--purple); }
+
+    .test-case-desc { font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 6px; }
+    .test-io-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .test-io-chip {
+        background: var(--bg-elevated);
+        border-radius: var(--radius-sm);
+        padding: 2px 8px;
+        font-size: 0.7rem;
+        color: var(--text-muted);
+    }
+    .test-io-chip span { color: var(--text-muted); margin-right: 3px; }
+    .test-io-chip em   { color: var(--text-secondary); font-style: normal; }
+
+    /* Explain modal overlay */
+    .explain-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.7);
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+    }
+    .explain-overlay.open { opacity: 1; pointer-events: all; }
+    .explain-modal {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        width: 480px;
+        max-width: 90vw;
+        max-height: 80vh;
+        overflow-y: auto;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        box-shadow: var(--shadow-lg);
+        transform: translateY(10px);
+        transition: transform 0.2s;
+    }
+    .explain-overlay.open .explain-modal { transform: translateY(0); }
+    .explain-modal h3 { font-size: 0.95rem; font-weight: 700; }
+    .explain-modal .explain-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+    .explain-modal p { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6; }
+    .explain-close {
+        align-self: flex-end;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+        border-radius: var(--radius);
+        padding: 6px 14px;
+        cursor: pointer;
+        font-family: var(--font-ui);
+        font-size: 0.8rem;
+    }
+
+    /* Test file block */
+    .test-file-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+    }
+    .test-file-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+        background: var(--bg-elevated);
+        border-bottom: 1px solid var(--border);
+    }
+    .test-file-title { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); }
+    .copy-btn {
+        background: var(--accent-dim);
+        border: 1px solid var(--accent-border);
+        color: var(--accent);
+        padding: 4px 12px;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-family: var(--font-ui);
+        font-size: 0.72rem;
+        font-weight: 700;
+        transition: all 0.15s;
+    }
+    .copy-btn:hover { background: var(--accent); color: white; }
+    .copy-btn.copied { background: var(--green); border-color: var(--green); color: white; }
+
+    .test-file-code {
+        font-family: var(--font-code);
+        font-size: 0.72rem;
+        line-height: 1.65;
+        padding: 14px;
+        max-height: 280px;
+        overflow-y: auto;
+        color: var(--text-primary);
+        white-space: pre;
+        background: #0d1117;
+    }
+
+    /* Syntax check block */
+    .syntax-check-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px;
+    }
+    .syntax-check-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.8rem;
+    }
+    .syntax-dot {
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .syntax-dot.ok      { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .syntax-dot.error   { background: var(--red);   box-shadow: 0 0 6px var(--red); }
+    .syntax-dot.pending { background: var(--yellow); }
+    .syntax-message { color: var(--text-secondary); }
+    .syntax-warning { font-size: 0.72rem; color: var(--yellow); margin-top: 4px; padding-left: 16px; }
+    .syntax-error-msg { font-size: 0.72rem; color: var(--red); margin-top: 4px; padding-left: 16px; font-family: var(--font-code); }
+
+    /* Setup block */
+    .setup-block {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px 14px;
+    }
+    .setup-block pre {
+        font-family: var(--font-code);
+        font-size: 0.75rem;
+        color: var(--green);
+        white-space: pre-wrap;
+        line-height: 1.7;
+        margin-top: 6px;
+    }
+
+    /* Missing coverage block */
+    .missing-list li {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        padding: 3px 0 3px 12px;
+        position: relative;
+    }
+    .missing-list li::before { content: "→"; position: absolute; left: 0; color: var(--text-muted); }
+
+    /* Detected functions chips */
+    .func-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .func-chip {
+        font-family: var(--font-code);
+        font-size: 0.68rem;
+        padding: 2px 8px;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text-muted);
+    }
+
+    /* Error banner */
+    .error-banner {
+        background: var(--red-dim);
+        border: 1px solid #ef444440;
+        border-radius: var(--radius);
+        padding: 10px 12px;
+        font-size: 0.78rem;
+        color: var(--red);
+        display: none;
+    }
+    .error-banner.visible { display: block; }
+
+    /* Loading shimmer */
+    .shimmer {
+        background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-elevated) 50%, var(--bg-card) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.4s infinite;
+        border-radius: var(--radius);
+        height: 64px;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* Section visibility */
+    #reviewSection { display: grid; }
+    #testSection { display: none; }
+    #auditSection { display: none; }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* Utility */
+    .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ NAVBAR ═══ -->
+<nav class="navbar">
+    <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        Autopsy AI
+        <span class="badge" id="moduleBadge">Code Reviewer</span>
+    </div>
+    <div class="nav-right">
+        <button class="icon-btn" id="themeToggle">☀ Light</button>
+    </div>
+</nav>
+
+<!-- ═══════════════════════════════════════ TABS ═══ -->
+<div class="week-tabs">
+    <button class="week-tab active" id="tabReview" onclick="switchTab('review')">📋 Code Review</button>
+    <button class="week-tab"        id="tabTest" onclick="switchTab('test')">🧪 Test Generator</button>
+    <button class="week-tab"        id="tabAudit" onclick="switchTab('audit')">🛡️ Security Audit</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  CODE REVIEWER                               -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<main class="dashboard" id="reviewSection">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">Submit Code</div>
+        <div class="input-section">
+            <label for="languageSelect">Language</label>
+            <select id="languageSelect">
+                <option value="python">Python</option>
+                <option value="javascript">JavaScript</option>
+                <option value="typescript">TypeScript</option>
+                <option value="html">HTML</option>
+                <option value="css">CSS</option>
+                <option value="java">Java</option>
+                <option value="cpp">C++</option>
+            </select>
+
+            <label for="codeInput">Source Code</label>
+            <textarea id="codeInput" style="flex:1; min-height:220px;" placeholder="Paste your code here...">def process_user(u):
+    x = 10
+    if u == 1:
+        if x > 5:
+            for i in range(10):
+                print(i)
+                print(i)
+    return u</textarea>
+
+            <div id="w1ErrorBanner" class="error-banner"></div>
+            <button id="analyzeBtn" class="primary-btn">
+                <span class="btn-text">Audit Code</span>
+                <span class="spinner" id="w1Spinner"></span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Middle: Code viewer -->
+    <section class="code-pane">
+        <div class="pane-header">
+            <span>Code Viewer</span>
+            <span class="file-chip" id="fileNameDisplay">untitled.py</span>
+        </div>
+        <div class="code-scroll">
+            <pre><code id="codeDisplay" class="language-python"></code></pre>
+        </div>
+    </section>
+
+    <!-- Right: Results -->
+    <aside class="results-panel">
+        <div class="pane-header"><span>AI Review Summary</span></div>
+        <div class="results-scroll" id="w1Results">
+            <div class="empty-state" id="w1EmptyState">
+                <div class="empty-icon">🤖</div>
+                <p>Paste code on the left and click Audit Code</p>
+            </div>
+        </div>
+    </aside>
+</main>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  TEST GENERATOR                              -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<main class="dashboard" id="testSection">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">Generate Tests</div>
+        <div class="input-section">
+
+            <label>Language</label>
+            <select id="testLanguageSelect">
+                <option value="python">Python → pytest</option>
+                <option value="javascript">JavaScript → Jest</option>
+                <option value="typescript">TypeScript → Jest+ts</option>
+                <option value="java">Java → JUnit 5</option>
+            </select>
+
+            <label>Function Name <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+            <input type="text" id="functionNameInput" placeholder="e.g. calculate_total">
+
+            <label>Test Depth</label>
+            <div class="depth-pills">
+                <button class="depth-pill" data-depth="quick">Quick<br><span style="font-weight:400;color:var(--text-muted)">~5</span></button>
+                <button class="depth-pill active" data-depth="standard">Standard<br><span style="font-weight:400;color:var(--text-muted)">~10</span></button>
+                <button class="depth-pill" data-depth="thorough">Thorough<br><span style="font-weight:400;color:var(--text-muted)">15+</span></button>
+            </div>
+
+            <div class="toggle-row">
+                <span>Include mocks/patches</span>
+                <label class="toggle"><input type="checkbox" id="includeMocks" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+                <span>Include fixtures</span>
+                <label class="toggle"><input type="checkbox" id="includeFixtures" checked><span class="toggle-slider"></span></label>
+            </div>
+
+            <label>Source Code</label>
+            <textarea id="testCodeInput" style="flex:1; min-height:180px;" placeholder="Paste the code you want tests for...">def calculate_discount(price, discount_pct):
+    if discount_pct < 0 or discount_pct > 100:
+        raise ValueError("Discount must be 0-100")
+    return price * (1 - discount_pct / 100)</textarea>
+
+            <div id="w2ErrorBanner" class="error-banner"></div>
+            <button id="generateTestBtn" class="primary-btn">
+                <span class="btn-text-test">Generate Tests</span>
+                <span class="spinner" id="w2Spinner"></span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Middle: Code viewer -->
+    <section class="code-pane">
+        <div class="pane-header">
+            <span>Code Being Tested</span>
+            <span class="file-chip" id="testFileNameDisplay">untitled.py</span>
+        </div>
+        <div class="code-scroll">
+            <pre><code id="testCodeDisplay" class="language-python"></code></pre>
+        </div>
+    </section>
+
+    <!-- Right: Test Results -->
+    <aside class="results-panel">
+        <div class="pane-header"><span>Generated Test Suite</span></div>
+        <div class="results-scroll" id="w2Results">
+            <div class="empty-state" id="w2EmptyState">
+                <div class="empty-icon">🧪</div>
+                <p>Paste code on the left and click Generate Tests</p>
+            </div>
+        </div>
+    </aside>
+</main>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  SECURITY AUDIT                              -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<main class="dashboard" id="auditSection">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">Security Scan</div>
+        <div class="input-section">
+
+            <label>Language</label>
+            <select id="auditLanguageSelect">
+                <option value="python">Python</option>
+                <option value="javascript">JavaScript</option>
+                <option value="typescript">TypeScript</option>
+                <option value="java">Java</option>
+                <option value="cpp">C++</option>
+            </select>
+
+            <label>Source Code</label>
+            <textarea id="auditCodeInput" style="flex:1; min-height:180px;" placeholder="Paste code to scan for OWASP vulnerabilities..."></textarea>
+
+            <div id="auditErrorBanner" class="error-banner"></div>
+            <button id="runAuditBtn" class="primary-btn" style="background:var(--purple);">
+                <span class="btn-text-audit">Run Security Scan</span>
+                <span class="spinner" id="auditSpinner"></span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Middle: Code viewer -->
+    <section class="code-pane">
+        <div class="pane-header">
+            <span>Code To Audit</span>
+            <span class="file-chip" id="auditFileNameDisplay">untitled.py</span>
+        </div>
+        <div class="code-scroll">
+            <pre><code id="auditCodeDisplay" class="language-python"></code></pre>
+        </div>
+    </section>
+
+    <!-- Right: Audit Results -->
+    <aside class="results-panel">
+        <div class="pane-header"><span>Security Posture Dashboard</span></div>
+        <div class="results-scroll" id="auditResults">
+            <div class="empty-state" id="auditEmptyState">
+                <div class="empty-icon" style="filter:none;">🛡️</div>
+                <p>Paste code on the left and click Run Security Scan</p>
+            </div>
+        </div>
+    </aside>
+</main>
+
+
+<!-- Explain modal -->
+<div class="explain-overlay" id="explainOverlay">
+    <div class="explain-modal" id="explainModal">
+        <h3 id="explainTitle">Test Explanation</h3>
+        <div>
+            <div class="explain-label">What it does</div>
+            <p id="explainOneLiner"></p>
+        </div>
+        <div>
+            <div class="explain-label">Why it matters</div>
+            <p id="explainWhy"></p>
+        </div>
+        <div>
+            <div class="explain-label">How to make it pass</div>
+            <p id="explainHow"></p>
+        </div>
+        <button class="explain-close" onclick="closeExplainModal()">Close</button>
+    </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
