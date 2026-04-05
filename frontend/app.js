@@ -22,7 +22,7 @@
   Change this once in one place and everything updates.
 */
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = "https://autopsy-ai.onrender.com";
 
 
 // ═══════════════════════════════════════════════════════
