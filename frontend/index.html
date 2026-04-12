@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Autopsy AI — Code Review, Test Generator & Security Audit</title>
+    <title>Autopsy AI — AI-Powered Software Auditing Platform</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
 
@@ -812,6 +812,180 @@
     #reviewSection { display: grid; }
     #testSection { display: none; }
     #auditSection { display: none; }
+    #repoSection { display: none; }
+    #qaSection { display: none; }
+    #dastSection { display: none; }
+    #analyzeSection { display: none; }
+    #depsSection { display: none; }
+    #branchSection { display: none; }
+    #dashboardSection { display: none; }
+
+    /* Full-width section (no 3-col grid) */
+    .full-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .full-section .section-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    /* Repo URL input bar */
+    .url-input-bar {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .url-input-bar input {
+        flex: 1;
+        padding: 10px 14px;
+        font-size: 0.85rem;
+    }
+    .url-input-bar select {
+        width: 140px;
+        padding: 10px 12px;
+    }
+    .url-input-bar button {
+        padding: 10px 24px;
+        white-space: nowrap;
+    }
+
+    /* Results grid cards */
+    .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 12px;
+    }
+    .result-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+    }
+    .result-card h3 {
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    .result-card p {
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+
+    /* Score radar / ring */
+    .score-ring {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        border: 6px solid var(--border);
+        margin: 0 auto;
+    }
+    .score-ring .score-num {
+        font-size: 2rem;
+        font-weight: 800;
+    }
+    .score-ring .score-label {
+        font-size: 0.68rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+    }
+
+    /* Score bars */
+    .score-bar-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.78rem;
+    }
+    .score-bar-row .bar-label {
+        width: 120px;
+        text-align: right;
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+    .score-bar-row .bar-track {
+        flex: 1;
+        height: 8px;
+        background: var(--bg-elevated);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    .score-bar-row .bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.6s ease;
+    }
+    .score-bar-row .bar-value {
+        width: 36px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    /* File list table */
+    .file-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.76rem;
+    }
+    .file-table th {
+        text-align: left;
+        padding: 8px 10px;
+        background: var(--bg-elevated);
+        color: var(--text-muted);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.68rem;
+    }
+    .file-table td {
+        padding: 6px 10px;
+        border-bottom: 1px solid var(--border-subtle);
+        color: var(--text-secondary);
+    }
+    .file-table tr:hover td {
+        background: var(--bg-elevated);
+    }
+
+    /* Framework/dep chips */
+    .fw-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        background: var(--bg-elevated);
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin: 2px;
+    }
+
+    /* Verdict badge */
+    .verdict-badge {
+        display: inline-block;
+        padding: 4px 16px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+    }
+    .verdict-SAFE_TO_MERGE { background: var(--green-dim); color: var(--green); border: 1px solid #22c55e40; }
+    .verdict-NEEDS_REVIEW { background: var(--yellow-dim); color: var(--yellow); border: 1px solid #eab30840; }
+    .verdict-BLOCK_MERGE { background: var(--red-dim); color: var(--red); border: 1px solid #ef444440; }
+
+    .week-tabs { flex-wrap: wrap; }
 
     /* Scrollbar styling */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -844,6 +1018,13 @@
     <button class="week-tab active" id="tabReview" onclick="switchTab('review')">📋 Code Review</button>
     <button class="week-tab"        id="tabTest" onclick="switchTab('test')">🧪 Test Generator</button>
     <button class="week-tab"        id="tabAudit" onclick="switchTab('audit')">🛡️ Security Audit</button>
+    <button class="week-tab"        id="tabRepo" onclick="switchTab('repo')">🔍 Repo Intel</button>
+    <button class="week-tab"        id="tabQa" onclick="switchTab('qa')">🧬 QA Scanner</button>
+    <button class="week-tab"        id="tabDast" onclick="switchTab('dast')">💥 DAST</button>
+    <button class="week-tab"        id="tabAnalyze" onclick="switchTab('analyze')">📐 Code Metrics</button>
+    <button class="week-tab"        id="tabDeps" onclick="switchTab('deps')">📦 Dependencies</button>
+    <button class="week-tab"        id="tabBranch" onclick="switchTab('branch')">🔀 Branch Compare</button>
+    <button class="week-tab"        id="tabDashboard" onclick="switchTab('dashboard')">📊 Dashboard</button>
 </div>
 
 
@@ -1034,6 +1215,190 @@
             </div>
         </div>
     </aside>
+</main>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  REPO INTELLIGENCE                                    -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<main class="full-section" id="repoSection">
+    <div class="pane-header">
+        <span>GitHub Repository Intelligence</span>
+        <span class="badge">AI Analysis</span>
+    </div>
+    <div class="section-body">
+        <div class="url-input-bar">
+            <input type="text" id="repoUrlInput" placeholder="https://github.com/owner/repo" style="font-family:var(--font-code);">
+            <input type="text" id="repoBranchInput" placeholder="Branch" value="main" style="width:120px;font-family:var(--font-code);">
+            <button class="primary-btn" id="analyzeRepoBtn" style="width:auto;">
+                <span class="btn-text-repo">Analyze Repository</span>
+                <span class="spinner" id="repoSpinner"></span>
+            </button>
+        </div>
+        <div id="repoErrorBanner" class="error-banner"></div>
+        <div id="repoResults">
+            <div class="empty-state">
+                <div class="empty-icon">🔍</div>
+                <p>Enter a GitHub repository URL above and click Analyze</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  REPO QA SCANNER                                       -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<main class="full-section" id="qaSection">
+    <div class="pane-header"><span>Repo-Level QA Scanner</span><span class="badge">Test Coverage Map</span></div>
+    <div class="section-body">
+        <div class="url-input-bar">
+            <input type="text" id="qaRepoUrl" placeholder="https://github.com/owner/repo" style="font-family:var(--font-code);">
+            <input type="text" id="qaBranch" placeholder="Branch" value="main" style="width:120px;font-family:var(--font-code);">
+            <label class="toggle" style="margin:0 8px;" title="Auto-generate tests for uncovered files">
+                <input type="checkbox" id="qaAutoGenerate">
+                <span class="toggle-slider"></span>
+            </label>
+            <span style="font-size:0.75rem;color:var(--text-muted);white-space:nowrap;">Auto-gen</span>
+            <button class="primary-btn" id="scanQaBtn" style="width:auto;">
+                <span class="btn-text-qa">Scan Test Coverage</span>
+                <span class="spinner" id="qaSpinner"></span>
+            </button>
+        </div>
+        <div id="qaErrorBanner" class="error-banner"></div>
+        <div id="qaResults"><div class="empty-state"><div class="empty-icon">🧬</div><p>Enter a repo URL to scan for missing and empty test files</p></div></div>
+    </div>
+</main>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  DAST SIMULATOR                                        -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<main class="full-section" id="dastSection">
+    <div class="pane-header"><span>Simulated DAST</span><span class="badge">Penetration Testing</span></div>
+    <div class="section-body">
+        <div style="display:flex;gap:10px;align-items:flex-end;">
+            <div style="flex:0 0 140px;"><label>Language</label>
+                <select id="dastLangSelect"><option value="python">Python</option><option value="javascript">JavaScript</option><option value="typescript">TypeScript</option><option value="java">Java</option></select>
+            </div>
+            <button class="primary-btn" id="runDastBtn" style="width:auto;margin-top:0;background:var(--orange);">
+                <span class="btn-text-dast">Discover & Attack</span>
+                <span class="spinner" id="dastSpinner"></span>
+            </button>
+        </div>
+        <textarea id="dastCodeInput" style="min-height:200px;max-height:300px;" placeholder="Paste your API/server code here (Flask, FastAPI, Express, etc.)..."></textarea>
+        <div id="dastErrorBanner" class="error-banner"></div>
+        <div id="dastResults"><div class="empty-state"><div class="empty-icon">💥</div><p>Paste your server/API code to discover endpoints and simulate attacks</p></div></div>
+    </div>
+</main>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  CODE METRICS / ANALYSIS                               -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<main class="full-section" id="analyzeSection">
+    <div class="pane-header"><span>Code Metrics &amp; Analysis</span><span class="badge">Real Metrics</span></div>
+    <div class="section-body">
+        <div style="display:flex;gap:10px;align-items:flex-end;">
+            <div style="flex:0 0 140px;"><label>Language</label>
+                <select id="analyzeLangSelect"><option value="python">Python</option><option value="javascript">JavaScript</option><option value="typescript">TypeScript</option></select>
+            </div>
+            <button class="primary-btn" id="runAnalyzeBtn" style="width:auto;margin-top:0;">
+                <span class="btn-text-analyze">Full Analysis</span>
+                <span class="spinner" id="analyzeSpinner"></span>
+            </button>
+        </div>
+        <textarea id="analyzeCodeInput" style="min-height:200px;max-height:300px;" placeholder="Paste code for metrics analysis (complexity, dead code, duplication, linting)..."></textarea>
+        <div id="analyzeErrorBanner" class="error-banner"></div>
+        <div id="analyzeResults"><div class="empty-state"><div class="empty-icon">📐</div><p>Paste code above for real cyclomatic complexity, dead code detection, and linting</p></div></div>
+    </div>
+</main>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  DEPENDENCY SCANNER                                    -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<main class="full-section" id="depsSection">
+    <div class="pane-header">
+        <span>Dependency Intelligence</span>
+        <span class="badge">CVE Scanner</span>
+    </div>
+    <div class="section-body">
+        <div style="display:flex;gap:10px;align-items:flex-end;">
+            <div style="flex:1;">
+                <label>Manifest Type</label>
+                <select id="depsManifestType">
+                    <option value="auto">Auto-detect</option>
+                    <option value="package.json">package.json (npm)</option>
+                    <option value="requirements.txt">requirements.txt (Python)</option>
+                    <option value="go.mod">go.mod (Go)</option>
+                </select>
+            </div>
+            <button class="primary-btn" id="scanDepsBtn" style="width:auto;margin-top:0;padding:10px 24px;">
+                <span class="btn-text-deps">Scan Dependencies</span>
+                <span class="spinner" id="depsSpinner"></span>
+            </button>
+        </div>
+        <textarea id="depsManifestInput" style="min-height:200px;max-height:300px;" placeholder="Paste your package.json, requirements.txt, or go.mod content here..."></textarea>
+        <div id="depsErrorBanner" class="error-banner"></div>
+        <div id="depsResults">
+            <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <p>Paste your dependency manifest above and click Scan</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  BRANCH COMPARE                                        -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<main class="full-section" id="branchSection">
+    <div class="pane-header">
+        <span>Branch-Level Intelligence</span>
+        <span class="badge">Diff Analysis</span>
+    </div>
+    <div class="section-body">
+        <div class="url-input-bar">
+            <input type="text" id="branchRepoUrl" placeholder="https://github.com/owner/repo" style="font-family:var(--font-code);flex:2;">
+            <input type="text" id="baseBranchInput" placeholder="Base: main" value="main" style="width:120px;font-family:var(--font-code);">
+            <input type="text" id="headBranchInput" placeholder="Head: feature" style="width:140px;font-family:var(--font-code);">
+            <button class="primary-btn" id="compareBranchBtn" style="width:auto;">
+                <span class="btn-text-branch">Compare Branches</span>
+                <span class="spinner" id="branchSpinner"></span>
+            </button>
+        </div>
+        <div id="branchErrorBanner" class="error-banner"></div>
+        <div id="branchResults">
+            <div class="empty-state">
+                <div class="empty-icon">🔀</div>
+                <p>Enter repo URL and two branch names to compare</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  HEALTH DASHBOARD                                      -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<main class="full-section" id="dashboardSection">
+    <div class="pane-header">
+        <span>Code Health Dashboard</span>
+        <span class="badge">Full Analysis</span>
+    </div>
+    <div class="section-body">
+        <div class="url-input-bar">
+            <input type="text" id="dashboardRepoUrl" placeholder="https://github.com/owner/repo" style="font-family:var(--font-code);">
+            <input type="text" id="dashboardBranchInput" placeholder="Branch" value="main" style="width:120px;font-family:var(--font-code);">
+            <button class="primary-btn" id="generateDashboardBtn" style="width:auto;background:linear-gradient(135deg, var(--accent), var(--purple));">
+                <span class="btn-text-dashboard">Generate Dashboard</span>
+                <span class="spinner" id="dashboardSpinner"></span>
+            </button>
+        </div>
+        <div id="dashboardErrorBanner" class="error-banner"></div>
+        <div id="dashboardResults">
+            <div class="empty-state">
+                <div class="empty-icon">📊</div>
+                <p>Enter a GitHub repo URL to generate a full code health dashboard</p>
+            </div>
+        </div>
+    </div>
 </main>
 
 

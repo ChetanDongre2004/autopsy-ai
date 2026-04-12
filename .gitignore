@@ -1,0 +1,38 @@
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+
+# Node
+node_modules/
+package-lock.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs & debug output
+*.log
+out.txt
+
+# Cloned repos (runtime artifacts)
+cloned_repos/
+temp_repos/

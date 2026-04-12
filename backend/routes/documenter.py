@@ -1,54 +1,27 @@
-"""
-routes/documenter.py
-====================
-WEEK 4 FEATURE: Automated Documentation Generator
-
-WHAT THIS FILE DOES:
-Reads code and generates two professional documentation files:
-  1. README.md     — the public-facing project overview for GitHub
-  2. TECHNICAL.md  — deep-dive technical docs for developers
-
-WHY IS DOCUMENTATION IMPORTANT?
-"Code is read 10x more often than it is written." — Robert C. Martin
-Good documentation lets a new developer contribute in hours, not weeks.
-It also shows professionalism when employers look at your GitHub.
-
-WHAT MAKES A GOOD README?
-A great README has:
-  - Clear title + one-line description
-  - What the project does and why it exists
-  - How to install and run it (step by step)
-  - How to use it (with code examples)
-  - Tech stack explanation
-  - Contributing guide
-
-WHAT IS DOCSTRING?
-A docstring is a string at the start of a function/class explaining
-what it does. Python uses triple quotes:
-  def add(a, b):
-      \"""Returns the sum of a and b.\"""
-      return a + b
-This module generates these automatically.
-"""
+# -*- coding: utf-8 -*-
+"""API routes for generating README and technical documentation from code."""
 
 import json
-import re
 from typing import Optional, List
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from ai_helper import call_claude
+from ai_helper import call_ai
+from utils.parsers import clean_ai_json
 
 router = APIRouter()
 
 
 class CodeFile(BaseModel):
-    """Represents one file in a multi-file submission"""
+    """One file in a multi-file documentation request."""
+
     name: str
     content: str
     language: str = "python"
 
 
 class DocumentRequest(BaseModel):
+    """Request body for documentation generation."""
+
     code: Optional[str] = None
     language: Optional[str] = "python"
     files: Optional[List[CodeFile]] = None
@@ -107,13 +80,8 @@ RESPOND ONLY WITH VALID JSON."""
 
 @router.post("/")
 async def generate_documentation(request: DocumentRequest):
-    """
-    POST /api/document
-    Generates README.md and technical documentation for provided code.
-    Body: { "code": "...", "language": "python", "project_name": "optional" }
-    Returns: JSON with readme and technicalDocs strings
-    """
-    # Build combined code content from single or multiple files
+    """Generate README and technical documentation for submitted code."""
+
     if request.files and len(request.files) > 0:
         code_content = "\n\n".join(
             f"### File: {f.name}\n```{f.language}\n{f.content}\n```"
@@ -142,17 +110,16 @@ async def generate_documentation(request: DocumentRequest):
     )
 
     try:
-        claude_response = await call_claude(DOCUMENTER_SYSTEM_PROMPT, user_message)
+        ai_response = await call_ai(DOCUMENTER_SYSTEM_PROMPT, user_message)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
     try:
-        clean = re.sub(r"```(?:json)?\s*", "", claude_response).replace("```", "").strip()
-        result = json.loads(clean)
+        result = clean_ai_json(ai_response)
     except json.JSONDecodeError:
         result = {
             "projectName": request.project_name or "Project",
-            "readme": claude_response,
+            "readme": ai_response,
             "technicalDocs": "",
             "rawResponse": True,
         }

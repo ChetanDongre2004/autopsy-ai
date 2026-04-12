@@ -22,26 +22,43 @@
   Change this once in one place and everything updates.
 */
 
-const API_BASE = "https://autopsy-ai.onrender.com";
+const API_BASE = window.location.origin;
 
 
 // ═══════════════════════════════════════════════════════
 //  WEEK SWITCHING
 // ═══════════════════════════════════════════════════════
 
-function switchTab(tab) {
-    document.getElementById("reviewSection").style.display = tab === "review" ? "grid" : "none";
-    document.getElementById("testSection").style.display = tab === "test" ? "grid" : "none";
-    document.getElementById("auditSection").style.display = tab === "audit" ? "grid" : "none";
+const ALL_TABS = ["review", "test", "audit", "repo", "qa", "dast", "analyze", "deps", "branch", "dashboard"];
+const GRID_TABS = ["review", "test", "audit"];
 
-    document.getElementById("tabReview").classList.toggle("active", tab === "review");
-    document.getElementById("tabTest").classList.toggle("active", tab === "test");
-    document.getElementById("tabAudit").classList.toggle("active", tab === "audit");
+function switchTab(tab) {
+    ALL_TABS.forEach(t => {
+        const el = document.getElementById(t + "Section");
+        if (!el) return;
+        if (t === tab) {
+            el.style.display = GRID_TABS.includes(t) ? "grid" : "flex";
+        } else {
+            el.style.display = "none";
+        }
+    });
+
+    ALL_TABS.forEach(t => {
+        const btn = document.getElementById("tab" + t.charAt(0).toUpperCase() + t.slice(1));
+        if (btn) btn.classList.toggle("active", t === tab);
+    });
 
     const badgeMap = {
         review: "Code Reviewer",
         test: "Test Generator",
-        audit: "Security Audit"
+        audit: "Security Audit",
+        repo: "Repo Intelligence",
+        qa: "QA Scanner",
+        dast: "DAST Simulator",
+        analyze: "Code Metrics",
+        deps: "Dependency Scanner",
+        branch: "Branch Compare",
+        dashboard: "Health Dashboard"
     };
     document.getElementById("moduleBadge").textContent = badgeMap[tab] || "Autopsy AI";
 }
@@ -784,6 +801,569 @@ document.addEventListener("DOMContentLoaded", () => {
 
         audit.resultsWrap.innerHTML = summaryHTML + vulnHTML;
     }
+
+    // ════════════════════════════════════════════════════════
+    //  REPO INTELLIGENCE
+    // ════════════════════════════════════════════════════════
+
+    const repoBtn = document.getElementById("analyzeRepoBtn");
+    const repoSpinner = document.getElementById("repoSpinner");
+    const repoBtnText = document.querySelector(".btn-text-repo");
+
+    repoBtn.addEventListener("click", async () => {
+        const url = document.getElementById("repoUrlInput").value.trim();
+        const branch = document.getElementById("repoBranchInput").value.trim() || "main";
+        const errBanner = document.getElementById("repoErrorBanner");
+        const results = document.getElementById("repoResults");
+
+        if (!url) { errBanner.textContent = "Please enter a GitHub repo URL"; errBanner.classList.add("visible"); return; }
+        errBanner.classList.remove("visible");
+
+        repoBtn.disabled = true;
+        repoSpinner.classList.add("visible");
+        repoBtnText.textContent = "Cloning & Analyzing...";
+        results.innerHTML = '<div class="shimmer" style="height:100px;"></div><div class="shimmer" style="height:60px;margin-top:8px;"></div><div class="shimmer" style="height:200px;margin-top:8px;"></div>';
+
+        try {
+            const res = await fetch(`${API_BASE}/api/repo/analyze`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ repo_url: url, branch })
+            });
+            if (!res.ok) { const e = await res.json(); throw new Error(e.detail || "Failed"); }
+            renderRepoResults(await res.json());
+        } catch (err) {
+            errBanner.textContent = `Error: ${err.message}`;
+            errBanner.classList.add("visible");
+            results.innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><p>Analysis failed. Check the URL and try again.</p></div>';
+        } finally {
+            repoBtn.disabled = false;
+            repoSpinner.classList.remove("visible");
+            repoBtnText.textContent = "Analyze Repository";
+        }
+    });
+
+    function renderRepoResults(data) {
+        const scan = data.scan || {};
+        const analysis = data.analysis || {};
+        const langs = scan.languages || {};
+        const topLang = Object.entries(langs).sort((a,b) => b[1]-a[1]);
+        const fws = scan.frameworks || [];
+
+        const langsHTML = topLang.map(([l, lines]) =>
+            `<span class="fw-chip">${l} <strong>${lines.toLocaleString()} lines</strong></span>`
+        ).join("");
+
+        const fwHTML = fws.map(fw =>
+            `<span class="fw-chip">${fw.name} ${fw.version || ""}</span>`
+        ).join("") || '<span style="color:var(--text-muted);font-size:0.78rem;">None detected</span>';
+
+        const filesHTML = (scan.files || []).slice(0, 30).map(f =>
+            `<tr><td style="font-family:var(--font-code);font-size:0.72rem;">${escapeHtml(f.path)}</td><td>${f.language}</td><td>${f.lines}</td><td><span class="fw-chip">${f.role}</span></td></tr>`
+        ).join("");
+
+        const scores = analysis.scores || {};
+        const scoreBarHTML = Object.entries(scores).map(([key, val]) => {
+            const color = val >= 80 ? "var(--green)" : val >= 60 ? "var(--yellow)" : "var(--red)";
+            const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+            return `<div class="score-bar-row"><span class="bar-label">${label}</span><div class="bar-track"><div class="bar-fill" style="width:${val}%;background:${color};"></div></div><span class="bar-value">${val}</span></div>`;
+        }).join("");
+
+        const recsHTML = (analysis.recommendations || []).map((r, i) =>
+            `<div class="issue-card" style="border-left-color:var(--accent);"><div class="issue-header"><span class="issue-type">#${i+1} ${r.title || ""}</span><span class="issue-line">${r.impact || ""}</span></div><div class="issue-desc">${r.description || ""}</div></div>`
+        ).join("");
+
+        document.getElementById("repoResults").innerHTML = `
+            <div class="results-grid">
+                <div class="result-card"><h3>Repository</h3><p style="font-size:1rem;font-weight:700;color:var(--accent);">${data.repository}</p><p>Branch: ${data.branch} | ${scan.totalFiles || 0} files | ${(scan.totalLines||0).toLocaleString()} lines</p></div>
+                <div class="result-card"><h3>Architecture</h3><p style="font-weight:700;color:var(--text-primary);">${(scan.architecture||{}).pattern||"Unknown"}</p><p>${(scan.architecture||{}).description||""}</p></div>
+                <div class="result-card"><h3>Test Coverage</h3><p style="font-size:1.2rem;font-weight:800;color:${(scan.testCoverage||{}).ratio > 50 ? 'var(--green)':'var(--yellow)'};">${(scan.testCoverage||{}).ratio||0}%</p><p>${(scan.testCoverage||{}).testCount||0} test files / ${(scan.testCoverage||{}).sourceCount||0} source files</p></div>
+            </div>
+            <div class="result-card"><h3>Languages</h3><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">${langsHTML}</div></div>
+            <div class="result-card"><h3>Frameworks & Tools</h3><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">${fwHTML}</div></div>
+            ${scoreBarHTML ? `<div class="result-card"><h3>Scores</h3><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">${scoreBarHTML}</div></div>` : ""}
+            ${analysis.techStackSummary ? `<div class="result-card"><h3>Tech Stack Analysis</h3><p>${analysis.techStackSummary}</p></div>` : ""}
+            ${recsHTML ? `<div class="result-card"><h3>Recommendations</h3>${recsHTML}</div>` : ""}
+            <div class="result-card"><h3>File Structure (Top 30)</h3><table class="file-table"><thead><tr><th>Path</th><th>Language</th><th>Lines</th><th>Role</th></tr></thead><tbody>${filesHTML}</tbody></table></div>
+        `;
+    }
+
+
+    // ════════════════════════════════════════════════════════
+    //  DEPENDENCY SCANNER
+    // ════════════════════════════════════════════════════════
+
+    const depsBtn = document.getElementById("scanDepsBtn");
+    const depsSpinner = document.getElementById("depsSpinner");
+    const depsBtnText = document.querySelector(".btn-text-deps");
+
+    depsBtn.addEventListener("click", async () => {
+        const manifest = document.getElementById("depsManifestInput").value.trim();
+        const mType = document.getElementById("depsManifestType").value;
+        const errBanner = document.getElementById("depsErrorBanner");
+        const results = document.getElementById("depsResults");
+
+        if (!manifest) { errBanner.textContent = "Please paste manifest content"; errBanner.classList.add("visible"); return; }
+        errBanner.classList.remove("visible");
+
+        depsBtn.disabled = true;
+        depsSpinner.classList.add("visible");
+        depsBtnText.textContent = "Scanning CVEs...";
+        results.innerHTML = '<div class="shimmer" style="height:80px;"></div><div class="shimmer" style="height:200px;margin-top:8px;"></div>';
+
+        try {
+            const res = await fetch(`${API_BASE}/api/dependencies/scan`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ manifest_content: manifest, manifest_type: mType })
+            });
+            if (!res.ok) { const e = await res.json(); throw new Error(e.detail || "Failed"); }
+            renderDepsResults(await res.json());
+        } catch (err) {
+            errBanner.textContent = `Error: ${err.message}`;
+            errBanner.classList.add("visible");
+            results.innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><p>Scan failed. Check your manifest content.</p></div>';
+        } finally {
+            depsBtn.disabled = false;
+            depsSpinner.classList.remove("visible");
+            depsBtnText.textContent = "Scan Dependencies";
+        }
+    });
+
+    function renderDepsResults(data) {
+        const analysis = data.analysis || {};
+        const healthScore = analysis.healthScore || 0;
+        const scoreColor = healthScore >= 80 ? "var(--green)" : healthScore >= 60 ? "var(--yellow)" : "var(--red)";
+
+        const pkgsHTML = (data.packages || []).map(pkg => {
+            const vulnBadge = pkg.vulnerable
+                ? `<span style="color:var(--red);font-weight:700;">⚠ ${pkg.vulnCount} vulnerabilities</span>`
+                : `<span style="color:var(--green);">✓ Secure</span>`;
+            const vulnDetails = (pkg.vulnerabilities || []).map(v =>
+                `<div style="margin-left:12px;padding:4px 0;font-size:0.72rem;border-bottom:1px solid var(--border-subtle);">
+                    <span style="color:${v.severity==='critical'?'var(--red)':v.severity==='high'?'var(--orange)':'var(--yellow)'};font-weight:700;">${v.severity.toUpperCase()}</span>
+                    <span style="color:var(--text-muted);margin-left:6px;">${v.cve || v.id}</span>
+                    <div style="color:var(--text-secondary);margin-top:2px;">${v.summary}</div>
+                    ${v.fixedIn ? `<div style="color:var(--green);margin-top:2px;">Fixed in: ${v.fixedIn}</div>` : ""}
+                </div>`
+            ).join("");
+
+            return `<tr>
+                <td style="font-family:var(--font-code);font-size:0.75rem;font-weight:600;">${pkg.name}</td>
+                <td>${pkg.version}</td>
+                <td>${pkg.ecosystem}</td>
+                <td>${vulnBadge}${vulnDetails}</td>
+            </tr>`;
+        }).join("");
+
+        const upgradeHTML = (analysis.upgradeRecommendations || []).map(u =>
+            `<div class="issue-card" style="border-left-color:${u.priority==='high'?'var(--red)':u.priority==='medium'?'var(--yellow)':'var(--blue)'};">
+                <div class="issue-header"><span class="issue-type">${u.package}</span><span class="issue-line">${u.current} → ${u.recommended}</span></div>
+                <div class="issue-desc">${u.reason}</div>
+                ${u.breakingChanges ? '<div style="color:var(--orange);font-size:0.72rem;">⚠ May include breaking changes</div>' : ''}
+            </div>`
+        ).join("");
+
+        document.getElementById("depsResults").innerHTML = `
+            <div class="results-grid">
+                <div class="result-card" style="text-align:center;">
+                    <div class="score-ring" style="border-color:${scoreColor}40;margin:8px auto;">
+                        <div class="score-num" style="color:${scoreColor};">${healthScore}</div>
+                        <div class="score-label">Health</div>
+                    </div>
+                </div>
+                <div class="result-card"><h3>Summary</h3>
+                    <div class="metrics-row" style="margin-top:8px;">
+                        <div class="metric-card red"><div class="metric-value">${data.criticalCount || 0}</div><div class="metric-label">Critical</div></div>
+                        <div class="metric-card yellow"><div class="metric-value">${data.totalVulnerabilities || 0}</div><div class="metric-label">Total Vulns</div></div>
+                        <div class="metric-card blue"><div class="metric-value">${data.totalPackages || 0}</div><div class="metric-label">Packages</div></div>
+                    </div>
+                </div>
+                <div class="result-card"><h3>Manifest</h3><p>${data.manifestType || "auto"}</p><p style="margin-top:4px;">${analysis.summary || ""}</p></div>
+            </div>
+            ${upgradeHTML ? `<div class="result-card"><h3>Upgrade Recommendations</h3>${upgradeHTML}</div>` : ""}
+            <div class="result-card"><h3>All Packages</h3><table class="file-table"><thead><tr><th>Package</th><th>Version</th><th>Ecosystem</th><th>Status</th></tr></thead><tbody>${pkgsHTML}</tbody></table></div>
+        `;
+    }
+
+
+    // ════════════════════════════════════════════════════════
+    //  BRANCH COMPARE
+    // ════════════════════════════════════════════════════════
+
+    const branchBtn = document.getElementById("compareBranchBtn");
+    const branchSpinner = document.getElementById("branchSpinner");
+    const branchBtnText = document.querySelector(".btn-text-branch");
+
+    branchBtn.addEventListener("click", async () => {
+        const url = document.getElementById("branchRepoUrl").value.trim();
+        const base = document.getElementById("baseBranchInput").value.trim() || "main";
+        const head = document.getElementById("headBranchInput").value.trim();
+        const errBanner = document.getElementById("branchErrorBanner");
+        const results = document.getElementById("branchResults");
+
+        if (!url || !head) { errBanner.textContent = "Please enter repo URL and head branch name"; errBanner.classList.add("visible"); return; }
+        errBanner.classList.remove("visible");
+
+        branchBtn.disabled = true;
+        branchSpinner.classList.add("visible");
+        branchBtnText.textContent = "Comparing...";
+        results.innerHTML = '<div class="shimmer" style="height:80px;"></div><div class="shimmer" style="height:200px;margin-top:8px;"></div>';
+
+        try {
+            const res = await fetch(`${API_BASE}/api/branch/compare`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ repo_url: url, base_branch: base, head_branch: head })
+            });
+            if (!res.ok) { const e = await res.json(); throw new Error(e.detail || "Failed"); }
+            renderBranchResults(await res.json());
+        } catch (err) {
+            errBanner.textContent = `Error: ${err.message}`;
+            errBanner.classList.add("visible");
+            results.innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><p>Comparison failed. Check repo URL and branch names.</p></div>';
+        } finally {
+            branchBtn.disabled = false;
+            branchSpinner.classList.remove("visible");
+            branchBtnText.textContent = "Compare Branches";
+        }
+    });
+
+    function renderBranchResults(data) {
+        const analysis = data.analysis || {};
+        const verdict = analysis.verdict || "NEEDS_REVIEW";
+        const changedFiles = data.changedFiles || [];
+        const commits = data.commits || [];
+        const issues = analysis.issues || [];
+
+        const filesHTML = changedFiles.map(f => {
+            const statusColors = { added: "var(--green)", modified: "var(--yellow)", deleted: "var(--red)" };
+            return `<tr><td style="font-family:var(--font-code);font-size:0.72rem;">${escapeHtml(f.path)}</td><td><span style="color:${statusColors[f.status]||'var(--text-muted)'};font-weight:700;">${f.status}</span></td></tr>`;
+        }).join("");
+
+        const commitsHTML = commits.slice(0, 15).map(c =>
+            `<div style="display:flex;gap:8px;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--border-subtle);font-size:0.76rem;">
+                <span style="font-family:var(--font-code);color:var(--accent);font-size:0.72rem;">${c.hash}</span>
+                <span style="color:var(--text-primary);flex:1;">${escapeHtml(c.message)}</span>
+                <span style="color:var(--text-muted);font-size:0.68rem;white-space:nowrap;">${c.author}</span>
+            </div>`
+        ).join("");
+
+        const issuesHTML = issues.map(issue => {
+            const sevColors = { critical: "var(--red)", high: "var(--orange)", medium: "var(--yellow)", low: "var(--blue)" };
+            return `<div class="issue-card" style="border-left-color:${sevColors[issue.severity]||'var(--border)'};">
+                <div class="issue-header">
+                    <span class="issue-type">${issue.type || "issue"}</span>
+                    <span class="issue-line" style="color:${sevColors[issue.severity]||'var(--text-muted)'};font-weight:700;">${(issue.severity||"").toUpperCase()}</span>
+                </div>
+                <div class="issue-desc">${issue.description || ""}</div>
+                ${issue.file ? `<div style="font-family:var(--font-code);font-size:0.68rem;color:var(--text-muted);margin:2px 0;">${issue.file}</div>` : ""}
+                ${issue.impact ? `<div style="font-size:0.72rem;color:var(--orange);margin-top:2px;">Impact: ${issue.impact}</div>` : ""}
+                ${issue.suggestion ? `<div class="issue-fix">Fix: ${issue.suggestion}</div>` : ""}
+            </div>`;
+        }).join("");
+
+        const positivesHTML = (analysis.positives || []).map(p => `<li>${p}</li>`).join("");
+
+        document.getElementById("branchResults").innerHTML = `
+            <div class="results-grid">
+                <div class="result-card" style="text-align:center;">
+                    <div class="verdict-badge verdict-${verdict}">${verdict.replace(/_/g, " ")}</div>
+                    <p style="margin-top:8px;">${analysis.summary || ""}</p>
+                </div>
+                <div class="result-card"><h3>Changes</h3>
+                    <div class="metrics-row" style="margin-top:8px;">
+                        <div class="metric-card blue"><div class="metric-value">${changedFiles.length}</div><div class="metric-label">Files</div></div>
+                        <div class="metric-card"><div class="metric-value">${commits.length}</div><div class="metric-label">Commits</div></div>
+                        <div class="metric-card red"><div class="metric-value">${issues.length}</div><div class="metric-label">Issues</div></div>
+                    </div>
+                </div>
+            </div>
+            ${issuesHTML ? `<div class="result-card"><h3>Issues Found (${issues.length})</h3>${issuesHTML}</div>` : '<div class="result-card"><h3>Issues</h3><p style="color:var(--green);">No issues found in this diff</p></div>'}
+            ${positivesHTML ? `<div class="result-card"><h3>Positives</h3><ul class="positives-list">${positivesHTML}</ul></div>` : ""}
+            ${commitsHTML ? `<div class="result-card"><h3>Commits (${commits.length})</h3>${commitsHTML}</div>` : ""}
+            ${filesHTML ? `<div class="result-card"><h3>Changed Files</h3><table class="file-table"><thead><tr><th>File</th><th>Status</th></tr></thead><tbody>${filesHTML}</tbody></table></div>` : ""}
+            ${(analysis.testingRecommendations||[]).length ? `<div class="result-card"><h3>Testing Recommendations</h3><ul class="missing-list">${analysis.testingRecommendations.map(t=>`<li>${t}</li>`).join("")}</ul></div>` : ""}
+        `;
+    }
+
+
+    // ════════════════════════════════════════════════════════
+    //  HEALTH DASHBOARD
+    // ════════════════════════════════════════════════════════
+
+    const dashBtn = document.getElementById("generateDashboardBtn");
+    const dashSpinner = document.getElementById("dashboardSpinner");
+    const dashBtnText = document.querySelector(".btn-text-dashboard");
+
+    dashBtn.addEventListener("click", async () => {
+        const url = document.getElementById("dashboardRepoUrl").value.trim();
+        const branch = document.getElementById("dashboardBranchInput").value.trim() || "main";
+        const errBanner = document.getElementById("dashboardErrorBanner");
+        const results = document.getElementById("dashboardResults");
+
+        if (!url) { errBanner.textContent = "Please enter a GitHub repo URL"; errBanner.classList.add("visible"); return; }
+        errBanner.classList.remove("visible");
+
+        dashBtn.disabled = true;
+        dashSpinner.classList.add("visible");
+        dashBtnText.textContent = "Analyzing Full Repo...";
+        results.innerHTML = '<div class="shimmer" style="height:120px;"></div><div class="shimmer" style="height:80px;margin-top:8px;"></div><div class="shimmer" style="height:200px;margin-top:8px;"></div>';
+
+        try {
+            const res = await fetch(`${API_BASE}/api/dashboard/generate`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ repo_url: url, branch })
+            });
+            if (!res.ok) { const e = await res.json(); throw new Error(e.detail || "Failed"); }
+            renderDashboard(await res.json());
+        } catch (err) {
+            errBanner.textContent = `Error: ${err.message}`;
+            errBanner.classList.add("visible");
+            results.innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><p>Dashboard generation failed.</p></div>';
+        } finally {
+            dashBtn.disabled = false;
+            dashSpinner.classList.remove("visible");
+            dashBtnText.textContent = "Generate Dashboard";
+        }
+    });
+
+    function renderDashboard(data) {
+        const scores = data.scores || {};
+        const repoInfo = data.repoInfo || {};
+        const overall = data.overallScore || 0;
+        const grade = data.grade || "?";
+        const gradeColors = { A: "var(--green)", B: "var(--blue)", C: "var(--yellow)", D: "var(--orange)", F: "var(--red)" };
+        const overallColor = gradeColors[grade] || "var(--text-muted)";
+
+        const scoreBarHTML = Object.entries(scores).map(([key, val]) => {
+            const color = val >= 80 ? "var(--green)" : val >= 60 ? "var(--yellow)" : "var(--red)";
+            const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+            return `<div class="score-bar-row"><span class="bar-label">${label}</span><div class="bar-track"><div class="bar-fill" style="width:${val}%;background:${color};"></div></div><span class="bar-value">${val}</span></div>`;
+        }).join("");
+
+        const breakdown = data.issueBreakdown || {};
+        const fileRisks = (data.fileRisks || []).slice(0, 10);
+        const fileRisksHTML = fileRisks.map(f => {
+            const color = f.severity==='high' ? 'var(--red)' : f.severity==='medium' ? 'var(--yellow)' : 'var(--blue)';
+            return `<div class="issue-card" style="border-left-color:${color};">
+                <div class="issue-header"><span class="issue-type" style="font-family:var(--font-code);text-transform:none;">${f.file}</span><span class="issue-line" style="color:${color};font-weight:700;">${f.score}/100</span></div>
+                <div class="issue-desc">${(f.issues||[]).join(", ")}</div>
+            </div>`;
+        }).join("");
+
+        const recsHTML = (data.topRecommendations || []).map((r, i) =>
+            `<div class="issue-card" style="border-left-color:var(--accent);">
+                <div class="issue-header"><span class="issue-type">#${i+1} ${r.title}</span><span class="issue-line">Impact: ${r.impact} | Effort: ${r.effort}</span></div>
+                <div class="issue-desc">${r.description}</div>
+            </div>`
+        ).join("");
+
+        const categoryHTML = Object.entries(data.categoryDetails || {}).map(([key, cat]) => {
+            const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+            return `<div class="result-card">
+                <h3>${label} — ${cat.score}/100</h3>
+                ${(cat.findings||[]).map(f => `<p style="margin-bottom:4px;">• ${f}</p>`).join("")}
+                ${(cat.recommendations||[]).map(r => `<p style="color:var(--green);margin-bottom:4px;">→ ${r}</p>`).join("")}
+            </div>`;
+        }).join("");
+
+        const techDebt = data.techDebt || {};
+        const langsHTML = Object.entries(repoInfo.languages || {}).map(([l, lines]) =>
+            `<span class="fw-chip">${l}: ${lines.toLocaleString()}</span>`
+        ).join("");
+
+        document.getElementById("dashboardResults").innerHTML = `
+            <div class="results-grid" style="grid-template-columns: 200px 1fr 1fr;">
+                <div class="result-card" style="text-align:center;">
+                    <div class="score-ring" style="border-color:${overallColor};">
+                        <div class="score-num" style="color:${overallColor};">${overall}</div>
+                        <div class="score-label">Grade ${grade}</div>
+                    </div>
+                </div>
+                <div class="result-card"><h3>Repo Info</h3>
+                    <p style="font-weight:700;color:var(--accent);">${repoInfo.name || ""}</p>
+                    <p>${repoInfo.totalFiles || 0} files | ${(repoInfo.totalLines||0).toLocaleString()} lines</p>
+                    <p>Tests: ${repoInfo.testFiles||0} / Sources: ${repoInfo.sourceFiles||0} (${repoInfo.testRatio||0}%)</p>
+                    <div style="margin-top:6px;">${langsHTML}</div>
+                </div>
+                <div class="result-card"><h3>Issue Breakdown</h3>
+                    <div class="metrics-row" style="margin-top:8px;grid-template-columns:repeat(4,1fr);">
+                        <div class="metric-card red"><div class="metric-value">${breakdown.critical||0}</div><div class="metric-label">Critical</div></div>
+                        <div class="metric-card" style="color:var(--orange);"><div class="metric-value">${breakdown.high||0}</div><div class="metric-label">High</div></div>
+                        <div class="metric-card yellow"><div class="metric-value">${breakdown.medium||0}</div><div class="metric-label">Medium</div></div>
+                        <div class="metric-card blue"><div class="metric-value">${breakdown.low||0}</div><div class="metric-label">Low</div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="result-card"><h3>Score Breakdown</h3><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">${scoreBarHTML}</div></div>
+            ${data.summary ? `<div class="result-card"><h3>Executive Summary</h3><p>${data.summary}</p></div>` : ""}
+            ${categoryHTML ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;">${categoryHTML}</div>` : ""}
+            ${fileRisksHTML ? `<div class="result-card"><h3>Riskiest Files</h3>${fileRisksHTML}</div>` : ""}
+            ${recsHTML ? `<div class="result-card"><h3>Top Recommendations</h3>${recsHTML}</div>` : ""}
+            ${techDebt.description ? `<div class="result-card"><h3>Technical Debt</h3><p><strong>${techDebt.level || "Unknown"}</strong> — Est. ${techDebt.estimatedHours || "?"} hours</p><p style="margin-top:4px;">${techDebt.description}</p></div>` : ""}
+        `;
+    }
+
+
+    // ════════════════════════════════════════════════════════
+    //  QA SCANNER
+    // ════════════════════════════════════════════════════════
+    document.getElementById("scanQaBtn").addEventListener("click", async () => {
+        const url = document.getElementById("qaRepoUrl").value.trim();
+        const branch = document.getElementById("qaBranch").value.trim() || "main";
+        const autoGen = document.getElementById("qaAutoGenerate").checked;
+        const errBanner = document.getElementById("qaErrorBanner");
+        const results = document.getElementById("qaResults");
+        const btn = document.getElementById("scanQaBtn");
+        const spinner = document.getElementById("qaSpinner");
+        const btnText = document.querySelector(".btn-text-qa");
+
+        if (!url) { errBanner.textContent = "Enter a repo URL"; errBanner.classList.add("visible"); return; }
+        errBanner.classList.remove("visible");
+        btn.disabled = true; spinner.classList.add("visible"); btnText.textContent = "Scanning...";
+        results.innerHTML = '<div class="shimmer" style="height:80px;"></div><div class="shimmer" style="height:200px;margin-top:8px;"></div>';
+
+        try {
+            const res = await fetch(`${API_BASE}/api/qa/scan`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({repo_url:url,branch,auto_generate:autoGen,max_generate:5}) });
+            if (!res.ok) { const e=await res.json(); throw new Error(e.detail||"Failed"); }
+            const data = await res.json();
+            const covColor = data.coveragePercent >= 70 ? "var(--green)" : data.coveragePercent >= 40 ? "var(--yellow)" : "var(--red)";
+
+            const mapHTML = (data.coverageMap||[]).slice(0,40).map(f => {
+                const sc = {covered:"var(--green)",missing:"var(--red)",empty:"var(--yellow)"};
+                return `<tr><td style="font-family:var(--font-code);font-size:0.72rem;">${escapeHtml(f.path)}</td><td>${f.language}</td><td><span style="color:${sc[f.status]||'var(--text-muted)'};font-weight:700;">${f.status.toUpperCase()}</span></td><td style="font-size:0.72rem;color:var(--text-muted);">${f.testFile||'--'}</td></tr>`;
+            }).join("");
+
+            const genHTML = (data.generatedTests||[]).map(g => g.error ? '' :
+                `<div class="result-card"><h3>${escapeHtml(g.sourceFile)}</h3><p>${g.framework} | ${g.testCount||0} tests | ${g.coverage||'N/A'}</p><pre class="test-file-code" style="max-height:200px;">${escapeHtml(g.testFile||'')}</pre></div>`
+            ).join("");
+
+            results.innerHTML = `
+                <div class="results-grid">
+                    <div class="result-card" style="text-align:center;"><div class="score-ring" style="border-color:${covColor};"><div class="score-num" style="color:${covColor};">${data.coveragePercent}%</div><div class="score-label">Coverage</div></div></div>
+                    <div class="result-card"><h3>Test Coverage</h3><div class="metrics-row" style="margin-top:8px;"><div class="metric-card blue"><div class="metric-value">${data.coveredFiles||0}</div><div class="metric-label">Covered</div></div><div class="metric-card red"><div class="metric-value">${data.missingTests||0}</div><div class="metric-label">Missing</div></div><div class="metric-card yellow"><div class="metric-value">${data.emptyTests||0}</div><div class="metric-label">Empty</div></div></div></div>
+                    <div class="result-card"><h3>Files</h3><p>${data.totalSourceFiles||0} source files<br>${data.totalTestFiles||0} test files</p><p style="margin-top:4px;">Frameworks: ${(data.frameworks||[]).join(', ')||'N/A'}</p></div>
+                </div>
+                <div class="result-card"><h3>Coverage Map</h3><table class="file-table"><thead><tr><th>Source File</th><th>Lang</th><th>Status</th><th>Test File</th></tr></thead><tbody>${mapHTML}</tbody></table></div>
+                ${genHTML ? '<div class="result-card"><h3>Auto-Generated Tests</h3>'+genHTML+'</div>' : ''}
+            `;
+        } catch (err) { errBanner.textContent=err.message; errBanner.classList.add("visible"); results.innerHTML='<div class="empty-state"><div class="empty-icon">❌</div><p>Scan failed</p></div>'; }
+        finally { btn.disabled=false; spinner.classList.remove("visible"); btnText.textContent="Scan Test Coverage"; }
+    });
+
+
+    // ════════════════════════════════════════════════════════
+    //  DAST SIMULATOR
+    // ════════════════════════════════════════════════════════
+    document.getElementById("runDastBtn").addEventListener("click", async () => {
+        const code = document.getElementById("dastCodeInput").value.trim();
+        const lang = document.getElementById("dastLangSelect").value;
+        const errBanner = document.getElementById("dastErrorBanner");
+        const results = document.getElementById("dastResults");
+        const btn = document.getElementById("runDastBtn");
+        const spinner = document.getElementById("dastSpinner");
+        const btnText = document.querySelector(".btn-text-dast");
+
+        if (!code) { errBanner.textContent="Paste API/server code"; errBanner.classList.add("visible"); return; }
+        errBanner.classList.remove("visible");
+        btn.disabled=true; spinner.classList.add("visible"); btnText.textContent="Scanning...";
+        results.innerHTML='<div class="shimmer" style="height:200px;"></div>';
+
+        try {
+            const res = await fetch(`${API_BASE}/api/dast/scan`, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({code,language:lang}) });
+            if (!res.ok) { const e=await res.json(); throw new Error(e.detail||"Failed"); }
+            const data = await res.json();
+            const sev = data.severityCounts||{};
+            const analysis = data.analysis||{};
+
+            const epsHTML = (data.endpoints||[]).map(ep =>
+                `<tr><td style="font-family:var(--font-code);font-size:0.72rem;">${ep.methods.join(',')} ${escapeHtml(ep.path)}</td><td>Line ${ep.line}</td><td>${ep.hasBody?'Yes':'No'}</td></tr>`
+            ).join("");
+
+            const scenariosHTML = (data.attackScenarios||[]).slice(0,20).map(s => {
+                const sc = {critical:"var(--red)",high:"var(--orange)",medium:"var(--yellow)",low:"var(--blue)"};
+                return `<div class="issue-card" style="border-left-color:${sc[s.severity]||'var(--border)'};">
+                    <div class="issue-header"><span class="issue-type">${s.attackType}</span><span class="issue-line" style="color:${sc[s.severity]};font-weight:700;">${s.severity.toUpperCase()}</span></div>
+                    <div class="issue-desc">${s.description}</div>
+                    <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">Endpoint: ${s.endpoint} | Vector: ${s.vector}</div>
+                    <div class="issue-fix">Expected: ${s.expectedBehavior}</div>
+                </div>`;
+            }).join("");
+
+            results.innerHTML = `
+                <div class="results-grid">
+                    <div class="result-card"><h3>Endpoints</h3><p style="font-size:1.5rem;font-weight:800;color:var(--accent);">${data.totalEndpoints||0}</p><p>API endpoints discovered</p></div>
+                    <div class="result-card"><h3>Attack Scenarios</h3><p style="font-size:1.5rem;font-weight:800;color:var(--orange);">${data.totalScenarios||0}</p></div>
+                    <div class="result-card"><h3>Severity</h3><div class="metrics-row" style="margin-top:8px;grid-template-columns:repeat(4,1fr);"><div class="metric-card red"><div class="metric-value">${sev.critical||0}</div><div class="metric-label">Critical</div></div><div class="metric-card" style="color:var(--orange);"><div class="metric-value">${sev.high||0}</div><div class="metric-label">High</div></div><div class="metric-card yellow"><div class="metric-value">${sev.medium||0}</div><div class="metric-label">Medium</div></div><div class="metric-card blue"><div class="metric-value">${sev.low||0}</div><div class="metric-label">Low</div></div></div></div>
+                </div>
+                ${analysis.summary ? `<div class="result-card"><h3>Risk Assessment</h3><p style="font-weight:700;color:var(--red);">${analysis.overallRisk||''} — Score: ${analysis.riskScore||'N/A'}/100</p><p style="margin-top:4px;">${analysis.summary}</p></div>` : ''}
+                ${epsHTML ? `<div class="result-card"><h3>Discovered Endpoints</h3><table class="file-table"><thead><tr><th>Endpoint</th><th>Line</th><th>Body</th></tr></thead><tbody>${epsHTML}</tbody></table></div>` : ''}
+                <div class="result-card"><h3>Attack Scenarios</h3>${scenariosHTML||'<p style="color:var(--green);">No attack scenarios generated</p>'}</div>
+            `;
+        } catch (err) { errBanner.textContent=err.message; errBanner.classList.add("visible"); results.innerHTML='<div class="empty-state"><div class="empty-icon">❌</div><p>DAST scan failed</p></div>'; }
+        finally { btn.disabled=false; spinner.classList.remove("visible"); btnText.textContent="Discover & Attack"; }
+    });
+
+
+    // ════════════════════════════════════════════════════════
+    //  CODE METRICS / FULL ANALYSIS
+    // ════════════════════════════════════════════════════════
+    document.getElementById("runAnalyzeBtn").addEventListener("click", async () => {
+        const code = document.getElementById("analyzeCodeInput").value.trim();
+        const lang = document.getElementById("analyzeLangSelect").value;
+        const errBanner = document.getElementById("analyzeErrorBanner");
+        const results = document.getElementById("analyzeResults");
+        const btn = document.getElementById("runAnalyzeBtn");
+        const spinner = document.getElementById("analyzeSpinner");
+        const btnText = document.querySelector(".btn-text-analyze");
+
+        if (!code) { errBanner.textContent="Paste code to analyze"; errBanner.classList.add("visible"); return; }
+        errBanner.classList.remove("visible");
+        btn.disabled=true; spinner.classList.add("visible"); btnText.textContent="Analyzing...";
+        results.innerHTML='<div class="shimmer" style="height:200px;"></div>';
+
+        try {
+            const res = await fetch(`${API_BASE}/api/analyze/full-analysis`, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({code,language:lang}) });
+            if (!res.ok) { const e=await res.json(); throw new Error(e.detail||"Failed"); }
+            const data = await res.json();
+            const fm = data.fileMetrics||{};
+            const gradeColors = {A:"var(--green)",B:"var(--blue)",C:"var(--yellow)",D:"var(--orange)",F:"var(--red)"};
+            const gc = gradeColors[data.grade]||"var(--text-muted)";
+
+            const cxHTML = (data.complexity||[]).map(c => {
+                const rc = {low:"var(--green)",moderate:"var(--yellow)",high:"var(--orange)",very_high:"var(--red)"};
+                return `<tr><td style="font-family:var(--font-code);font-size:0.75rem;">${c.function}</td><td style="color:${rc[c.rating]};font-weight:700;">${c.complexity}</td><td>${c.rating}</td><td>Line ${c.line}</td></tr>`;
+            }).join("");
+
+            const dcHTML = (data.deadCode||[]).map(d =>
+                `<div class="issue-card" style="border-left-color:var(--yellow);"><div class="issue-header"><span class="issue-type">${d.type.replace(/_/g,' ')}</span>${d.line?`<span class="issue-line">Line ${d.line}</span>`:''}</div><div class="issue-desc">${d.description}</div>${d.fix?`<div class="issue-fix">${d.fix}</div>`:''}</div>`
+            ).join("");
+
+            const lintHTML = (data.lintIssues||[]).map(l =>
+                `<div class="issue-card" style="border-left-color:var(--blue);"><div class="issue-header"><span class="issue-type">${l.rule||''}</span>${l.line?`<span class="issue-line">Line ${l.line}</span>`:''}</div><div class="issue-desc">${l.message}</div></div>`
+            ).join("");
+
+            const dupHTML = (data.duplications||[]).map(d =>
+                `<div class="issue-card" style="border-left-color:var(--purple);"><div class="issue-header"><span class="issue-type">Duplicate Block</span><span class="issue-line">Lines ${d.line1} & ${d.line2}</span></div><div class="issue-desc" style="font-family:var(--font-code);font-size:0.72rem;">${escapeHtml(d.snippet)}</div></div>`
+            ).join("");
+
+            results.innerHTML = `
+                <div class="results-grid">
+                    <div class="result-card" style="text-align:center;"><div class="score-ring" style="border-color:${gc};"><div class="score-num" style="color:${gc};">${data.score}</div><div class="score-label">Grade ${data.grade}</div></div></div>
+                    <div class="result-card"><h3>File Metrics</h3><div class="metrics-row" style="margin-top:8px;grid-template-columns:repeat(3,1fr);"><div class="metric-card"><div class="metric-value">${fm.totalLines||0}</div><div class="metric-label">Total Lines</div></div><div class="metric-card"><div class="metric-value">${fm.functions||0}</div><div class="metric-label">Functions</div></div><div class="metric-card"><div class="metric-value">${fm.classes||0}</div><div class="metric-label">Classes</div></div></div><p style="font-size:0.75rem;margin-top:8px;">Code: ${fm.codeLines||0} | Comments: ${fm.commentLines||0} (${fm.commentRatio||0}%) | Blank: ${fm.blankLines||0} | Max Nesting: ${fm.maxNesting||0}</p></div>
+                    <div class="result-card"><h3>Summary</h3><div class="metrics-row" style="margin-top:8px;grid-template-columns:repeat(3,1fr);"><div class="metric-card"><div class="metric-value">${data.averageComplexity||0}</div><div class="metric-label">Avg Complexity</div></div><div class="metric-card"><div class="metric-value">${data.duplicationCount||0}</div><div class="metric-label">Duplications</div></div><div class="metric-card red"><div class="metric-value">${data.totalIssues||0}</div><div class="metric-label">Issues</div></div></div></div>
+                </div>
+                ${cxHTML ? `<div class="result-card"><h3>Cyclomatic Complexity</h3><table class="file-table"><thead><tr><th>Function</th><th>Complexity</th><th>Rating</th><th>Location</th></tr></thead><tbody>${cxHTML}</tbody></table></div>` : ''}
+                ${dcHTML ? `<div class="result-card"><h3>Dead Code (${data.deadCode.length})</h3>${dcHTML}</div>` : ''}
+                ${lintHTML ? `<div class="result-card"><h3>Lint Issues (${data.lintIssues.length})</h3>${lintHTML}</div>` : ''}
+                ${dupHTML ? `<div class="result-card"><h3>Code Duplication (${data.duplications.length})</h3>${dupHTML}</div>` : ''}
+            `;
+        } catch (err) { errBanner.textContent=err.message; errBanner.classList.add("visible"); results.innerHTML='<div class="empty-state"><div class="empty-icon">❌</div><p>Analysis failed</p></div>'; }
+        finally { btn.disabled=false; spinner.classList.remove("visible"); btnText.textContent="Full Analysis"; }
+    });
+
 
     // ─────────────────────────────────────────────────────────
     //  INIT — trigger viewers on load
