@@ -14,7 +14,7 @@ from typing import Tuple
 
 logger = logging.getLogger("autopsy.git")
 
-CLONE_BASE = Path(tempfile.gettempdir()) / "autopsy_repos"
+CLONE_BASE = Path(__file__).resolve().parent.parent.parent / "cloned_repos"
 CLONE_BASE.mkdir(exist_ok=True)
 
 
