@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ code, language: lang }),
             });
-            if (!res.ok) { const e = await res.json(); throw new Error(e.detail || `Server error ${res.status}`); }
+            if (!res.ok) { let msg = `Server error ${res.status}`; try { const e = await res.json(); msg = e.detail || msg; } catch {} throw new Error(msg); }
             renderW1Results(await res.json());
         } catch (err) {
             showError(w1.errorBanner, err.message);
@@ -233,7 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),
             });
-            if (!res.ok) { const e = await res.json(); throw new Error(e.detail || `Server error ${res.status}`); }
+            if (!res.ok) { let msg = `Server error ${res.status}`; try { const e = await res.json(); msg = e.detail || msg; } catch {} throw new Error(msg); }
             renderW2Results(await res.json());
         } catch (err) {
             showError(w2.errorBanner, err.message);
@@ -349,7 +349,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ code, language: lang }),
             });
-            if (!res.ok) { const e = await res.json(); throw new Error(e.detail || `Server error ${res.status}`); }
+            if (!res.ok) { let msg = `Server error ${res.status}`; try { const e = await res.json(); msg = e.detail || msg; } catch {} throw new Error(msg); }
             renderAuditResults(await res.json());
         } catch (err) {
             showError(audit.errorBanner, err.message);
@@ -757,7 +757,11 @@ async function apiPost(endpoint, body) {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
     });
-    if (!res.ok) { const e = await res.json(); throw new Error(e.detail || `Server error ${res.status}`); }
+    if (!res.ok) {
+        let msg = `Server error ${res.status}`;
+        try { const e = await res.json(); msg = e.detail || msg; } catch { try { msg = await res.text(); } catch {} }
+        throw new Error(msg);
+    }
     return await res.json();
 }
 
