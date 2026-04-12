@@ -3,78 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Autopsy AI — AI-Powered Software Auditing Platform</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Autopsy AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
-
     <style>
-    /* ══════════════════════════════════════════════════════
-       DESIGN SYSTEM — CSS Variables
-       ══════════════════════════════════════════════════════ */
     :root {
-        --bg-base:        #0a0a0f;
-        --bg-surface:     #111118;
-        --bg-elevated:    #18181f;
-        --bg-card:        #1e1e28;
-        --bg-input:       #13131a;
-        --border:         #2a2a38;
-        --border-subtle:  #1f1f2b;
-        --text-primary:   #e8e8f0;
-        --text-secondary: #9898b0;
-        --text-muted:     #5c5c78;
-        --accent:         #6c63ff;
-        --accent-dim:     #6c63ff25;
-        --accent-border:  #6c63ff50;
-        --green:          #22c55e;
-        --green-dim:      #22c55e20;
-        --yellow:         #eab308;
-        --yellow-dim:     #eab30820;
-        --red:            #ef4444;
-        --red-dim:        #ef444420;
-        --purple:         #a855f7;
-        --purple-dim:     #a855f720;
-        --blue:           #3b82f6;
-        --blue-dim:       #3b82f620;
-        --orange:         #f97316;
-
-        --radius-sm:  4px;
-        --radius:     8px;
-        --radius-lg:  12px;
-        --radius-xl:  16px;
-
-        --font-ui:   'Syne', sans-serif;
-        --font-code: 'JetBrains Mono', monospace;
-
-        --shadow-sm: 0 1px 3px rgba(0,0,0,.4);
-        --shadow:    0 4px 16px rgba(0,0,0,.5);
-        --shadow-lg: 0 8px 32px rgba(0,0,0,.6);
+        --bg-0: #09090b;
+        --bg-1: #0f0f13;
+        --bg-2: #16161c;
+        --bg-3: #1c1c24;
+        --bg-4: #24242e;
+        --border: #2a2a36;
+        --border-hover: #3a3a48;
+        --text-1: #ececf1;
+        --text-2: #a1a1b5;
+        --text-3: #6b6b80;
+        --accent: #7c6aff;
+        --accent-hover: #8d7eff;
+        --accent-bg: rgba(124,106,255,.12);
+        --accent-border: rgba(124,106,255,.3);
+        --green: #34d399;
+        --green-bg: rgba(52,211,153,.1);
+        --yellow: #fbbf24;
+        --yellow-bg: rgba(251,191,36,.1);
+        --red: #f87171;
+        --red-bg: rgba(248,113,113,.1);
+        --orange: #fb923c;
+        --orange-bg: rgba(251,146,60,.1);
+        --blue: #60a5fa;
+        --blue-bg: rgba(96,165,250,.1);
+        --purple: #c084fc;
+        --purple-bg: rgba(192,132,252,.1);
+        --r: 8px;
+        --r-lg: 12px;
+        --font: 'Inter', -apple-system, sans-serif;
+        --mono: 'JetBrains Mono', monospace;
     }
-
     [data-theme="light"] {
-        --bg-base:        #f0f0f8;
-        --bg-surface:     #ffffff;
-        --bg-elevated:    #f8f8ff;
-        --bg-card:        #ffffff;
-        --bg-input:       #f4f4fc;
-        --border:         #dddde8;
-        --border-subtle:  #eeeef6;
-        --text-primary:   #1a1a2e;
-        --text-secondary: #5a5a78;
-        --text-muted:     #9090a8;
+        --bg-0: #f5f5f7; --bg-1: #ffffff; --bg-2: #f8f8fc; --bg-3: #f0f0f6; --bg-4: #e8e8f0;
+        --border: #ddd; --border-hover: #bbb; --text-1: #111; --text-2: #555; --text-3: #999;
     }
 
-    /* ══════════════════════════════════════════════════════
-       RESET & BASE
-       ══════════════════════════════════════════════════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html { height: 100%; }
-
+    html, body { height: 100%; }
     body {
-        font-family: var(--font-ui);
-        background: var(--bg-base);
-        color: var(--text-primary);
-        height: 100%;
+        font-family: var(--font);
+        background: var(--bg-0);
+        color: var(--text-1);
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -82,974 +57,395 @@
         line-height: 1.5;
     }
 
-    /* ══════════════════════════════════════════════════════
-       TOP NAV
-       ══════════════════════════════════════════════════════ */
+    /* NAV */
     .navbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 20px;
-        height: 52px;
-        background: var(--bg-surface);
-        border-bottom: 1px solid var(--border);
-        flex-shrink: 0;
-        z-index: 100;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0 20px; height: 50px; background: var(--bg-1);
+        border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 100;
     }
-    .logo {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: 700;
-        font-size: 1rem;
-        letter-spacing: -0.3px;
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.05rem; }
+    .logo svg { width: 22px; height: 22px; color: var(--accent); }
+    .module-badge {
+        font-size: .68rem; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+        background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent-border);
     }
-    .logo svg { width: 20px; height: 20px; color: var(--accent); }
-    .badge {
-        font-size: 0.7rem;
-        font-weight: 600;
-        padding: 2px 10px;
-        border-radius: 20px;
-        background: var(--accent-dim);
-        color: var(--accent);
-        border: 1px solid var(--accent-border);
-        letter-spacing: 0.2px;
-    }
-    .nav-right { display: flex; align-items: center; gap: 8px; }
+    .nav-right { display: flex; gap: 8px; }
     .icon-btn {
-        background: var(--bg-elevated);
-        border: 1px solid var(--border);
-        color: var(--text-secondary);
-        padding: 6px 14px;
-        border-radius: var(--radius);
-        cursor: pointer;
-        font-family: var(--font-ui);
-        font-size: 0.78rem;
-        font-weight: 500;
-        transition: all 0.15s;
+        background: var(--bg-3); border: 1px solid var(--border); color: var(--text-2);
+        padding: 5px 12px; border-radius: var(--r); cursor: pointer; font-family: var(--font);
+        font-size: .76rem; font-weight: 500; transition: .15s;
     }
-    .icon-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+    .icon-btn:hover { border-color: var(--accent); color: var(--text-1); }
 
-    /* ══════════════════════════════════════════════════════
-       WEEK TABS
-       ══════════════════════════════════════════════════════ */
-    .week-tabs {
-        display: flex;
-        gap: 6px;
-        padding: 10px 20px;
-        background: var(--bg-surface);
-        border-bottom: 1px solid var(--border);
-        flex-shrink: 0;
+    /* TABS */
+    .tab-bar {
+        display: flex; gap: 4px; padding: 8px 16px; background: var(--bg-1);
+        border-bottom: 1px solid var(--border); flex-shrink: 0; flex-wrap: wrap;
+        position: relative; z-index: 50;
     }
-    .week-tab {
-        padding: 7px 18px;
-        border-radius: var(--radius);
-        border: 1px solid var(--border);
-        background: transparent;
-        color: var(--text-muted);
-        cursor: pointer;
-        font-family: var(--font-ui);
-        font-size: 0.8rem;
-        font-weight: 600;
-        transition: all 0.15s;
-        letter-spacing: 0.1px;
+    .tab-btn {
+        padding: 6px 14px; border-radius: 6px; border: 1px solid transparent;
+        background: transparent; color: var(--text-3); cursor: pointer;
+        font-family: var(--font); font-size: .75rem; font-weight: 600;
+        transition: .15s; white-space: nowrap;
     }
-    .week-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .week-tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .tab-btn:hover { color: var(--text-2); background: var(--bg-3); }
+    .tab-btn.active {
+        background: var(--accent); color: #fff; border-color: var(--accent);
+        box-shadow: 0 2px 8px rgba(124,106,255,.3);
+    }
 
-    /* ══════════════════════════════════════════════════════
-       DASHBOARD LAYOUT — 3-column grid
-       ══════════════════════════════════════════════════════ */
-    .dashboard {
-        flex: 1;
-        display: grid;
-        grid-template-columns: 280px 1fr 340px;
+    /* 3-COL LAYOUT */
+    .panel-grid {
+        flex: 1; display: grid; grid-template-columns: 260px 1fr 320px;
         overflow: hidden;
     }
-
-    /* ══════════════════════════════════════════════════════
-       SIDEBAR (left column)
-       ══════════════════════════════════════════════════════ */
     .sidebar {
-        background: var(--bg-surface);
-        border-right: 1px solid var(--border);
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
+        background: var(--bg-1); border-right: 1px solid var(--border);
+        display: flex; flex-direction: column; overflow: hidden;
     }
     .sidebar-header {
-        padding: 14px 16px 10px;
-        border-bottom: 1px solid var(--border-subtle);
-        font-size: 0.78rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: var(--text-muted);
+        padding: 12px 14px 8px; font-size: .72rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: .8px; color: var(--text-3);
+        border-bottom: 1px solid var(--border);
     }
-    .input-section {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        padding: 14px 16px;
-        overflow-y: auto;
-    }
-    label {
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: var(--text-secondary);
-        letter-spacing: 0.3px;
-    }
+    .input-area { flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; overflow-y: auto; }
+    label { font-size: .72rem; font-weight: 600; color: var(--text-2); }
     select, input[type="text"] {
-        width: 100%;
-        padding: 8px 10px;
-        background: var(--bg-input);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        color: var(--text-primary);
-        font-family: var(--font-ui);
-        font-size: 0.82rem;
-        outline: none;
-        transition: border-color 0.15s;
-        appearance: none;
+        width: 100%; padding: 7px 10px; background: var(--bg-2); border: 1px solid var(--border);
+        border-radius: var(--r); color: var(--text-1); font-family: var(--font);
+        font-size: .8rem; outline: none; transition: border .15s;
     }
     select:focus, input[type="text"]:focus { border-color: var(--accent); }
-
     textarea {
-        width: 100%;
-        flex: 1;
-        min-height: 160px;
-        padding: 10px;
-        background: var(--bg-input);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        color: var(--text-primary);
-        font-family: var(--font-code);
-        font-size: 0.76rem;
-        line-height: 1.6;
-        resize: none;
-        outline: none;
-        transition: border-color 0.15s;
+        width: 100%; flex: 1; min-height: 140px; padding: 10px; background: var(--bg-2);
+        border: 1px solid var(--border); border-radius: var(--r); color: var(--text-1);
+        font-family: var(--mono); font-size: .76rem; line-height: 1.6;
+        resize: none; outline: none; transition: border .15s;
     }
     textarea:focus { border-color: var(--accent); }
-    textarea::placeholder { color: var(--text-muted); }
+    textarea::placeholder { color: var(--text-3); }
 
-    /* Depth selector pills */
-    .depth-pills { display: flex; gap: 6px; }
+    .depth-pills { display: flex; gap: 4px; }
     .depth-pill {
-        flex: 1;
-        padding: 6px 8px;
-        background: var(--bg-input);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        color: var(--text-muted);
-        font-family: var(--font-ui);
-        font-size: 0.72rem;
-        font-weight: 600;
-        cursor: pointer;
-        text-align: center;
-        transition: all 0.15s;
+        flex: 1; padding: 5px; background: var(--bg-2); border: 1px solid var(--border);
+        border-radius: var(--r); color: var(--text-3); font-family: var(--font);
+        font-size: .7rem; font-weight: 600; cursor: pointer; text-align: center; transition: .15s;
     }
-    .depth-pill.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
-    .depth-pill:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
-
-    /* Toggle options */
-    .toggle-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-size: 0.78rem;
-        color: var(--text-secondary);
-    }
-    .toggle {
-        position: relative;
-        width: 34px;
-        height: 18px;
-    }
+    .depth-pill.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; font-size: .76rem; color: var(--text-2); }
+    .toggle { position: relative; width: 32px; height: 16px; }
     .toggle input { opacity: 0; width: 0; height: 0; }
     .toggle-slider {
-        position: absolute;
-        inset: 0;
-        background: var(--border);
-        border-radius: 20px;
-        cursor: pointer;
-        transition: 0.2s;
+        position: absolute; inset: 0; background: var(--border); border-radius: 20px;
+        cursor: pointer; transition: .2s;
     }
     .toggle-slider::before {
-        content: "";
-        position: absolute;
-        width: 12px; height: 12px;
-        left: 3px; top: 3px;
-        background: white;
-        border-radius: 50%;
-        transition: 0.2s;
+        content: ""; position: absolute; width: 10px; height: 10px; left: 3px; top: 3px;
+        background: #fff; border-radius: 50%; transition: .2s;
     }
     .toggle input:checked + .toggle-slider { background: var(--accent); }
     .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
 
-    /* Primary button */
     .primary-btn {
-        width: 100%;
-        padding: 10px;
-        background: var(--accent);
-        border: none;
-        border-radius: var(--radius);
-        color: white;
-        font-family: var(--font-ui);
-        font-size: 0.85rem;
-        font-weight: 700;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        transition: all 0.15s;
-        letter-spacing: 0.2px;
+        width: 100%; padding: 9px; background: var(--accent); border: none;
+        border-radius: var(--r); color: #fff; font-family: var(--font);
+        font-size: .82rem; font-weight: 700; cursor: pointer; display: flex;
+        align-items: center; justify-content: center; gap: 8px; transition: .15s;
         margin-top: auto;
     }
-    .primary-btn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
-    .primary-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+    .primary-btn:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+    .primary-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 
-    /* Spinner */
-    .spinner {
-        width: 14px; height: 14px;
-        border: 2px solid rgba(255,255,255,0.3);
-        border-top-color: white;
-        border-radius: 50%;
-        animation: spin 0.7s linear infinite;
-        display: none;
-    }
+    .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; display: none; animation: spin .7s linear infinite; }
     .spinner.visible { display: block; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ══════════════════════════════════════════════════════
-       MIDDLE — Code Viewer
-       ══════════════════════════════════════════════════════ */
+    /* CODE PANE */
     .code-pane {
-        background: var(--bg-base);
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        border-right: 1px solid var(--border);
+        background: var(--bg-0); display: flex; flex-direction: column;
+        overflow: hidden; border-right: 1px solid var(--border);
     }
     .pane-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 10px 16px;
-        background: var(--bg-surface);
-        border-bottom: 1px solid var(--border);
-        font-size: 0.78rem;
-        font-weight: 600;
-        color: var(--text-secondary);
-        letter-spacing: 0.3px;
-        flex-shrink: 0;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 8px 14px; background: var(--bg-1); border-bottom: 1px solid var(--border);
+        font-size: .76rem; font-weight: 600; color: var(--text-2); flex-shrink: 0;
     }
     .file-chip {
-        font-family: var(--font-code);
-        font-size: 0.72rem;
-        background: var(--bg-elevated);
-        border: 1px solid var(--border);
-        padding: 2px 8px;
-        border-radius: var(--radius-sm);
-        color: var(--text-muted);
+        font-family: var(--mono); font-size: .68rem; background: var(--bg-3);
+        border: 1px solid var(--border); padding: 2px 8px; border-radius: 4px; color: var(--text-3);
     }
-    .code-scroll {
-        flex: 1;
-        overflow: auto;
-        padding: 16px;
-    }
-    .code-scroll pre {
-        margin: 0;
-        font-family: var(--font-code);
-        font-size: 0.78rem;
-        line-height: 1.7;
-    }
+    .code-scroll { flex: 1; overflow: auto; padding: 12px; }
+    .code-scroll pre { margin: 0; font-family: var(--mono); font-size: .76rem; line-height: 1.7; }
 
-    /* ══════════════════════════════════════════════════════
-       RIGHT PANEL — Results
-       ══════════════════════════════════════════════════════ */
-    .results-panel {
-        background: var(--bg-surface);
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
-    .results-scroll {
-        flex: 1;
-        overflow-y: auto;
-        padding: 14px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
+    /* RESULTS PANEL */
+    .results-panel { background: var(--bg-1); display: flex; flex-direction: column; overflow: hidden; }
+    .results-scroll { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
 
-    /* Empty state */
     .empty-state {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        padding: 40px 20px;
-        text-align: center;
+        flex: 1; display: flex; flex-direction: column; align-items: center;
+        justify-content: center; gap: 10px; padding: 40px 16px; text-align: center;
     }
-    .empty-icon {
-        font-size: 2.5rem;
-        filter: grayscale(1);
-        opacity: 0.4;
-    }
-    .empty-state p {
-        font-size: 0.82rem;
-        color: var(--text-muted);
-        max-width: 180px;
-        line-height: 1.6;
-    }
+    .empty-icon { font-size: 2.2rem; opacity: .4; }
+    .empty-state p { font-size: .78rem; color: var(--text-3); max-width: 180px; }
 
-    /* ─── Week 1 Review Results ─── */
-    .score-card {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 14px;
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-    }
+    /* SCORE CARD */
+    .score-card { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-lg); }
     .grade-circle {
-        width: 56px; height: 56px;
-        border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.4rem; font-weight: 800;
-        color: white; flex-shrink: 0;
-        background: var(--text-muted);
+        width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center;
+        justify-content: center; font-size: 1.3rem; font-weight: 800; color: #fff; flex-shrink: 0;
     }
-    .score-details h2 { font-size: 1.1rem; font-weight: 700; }
-    .score-details p  { font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px; line-height: 1.4; }
+    .score-details h2 { font-size: 1rem; font-weight: 700; }
+    .score-details p { font-size: .76rem; color: var(--text-2); margin-top: 2px; }
 
-    .metrics-row {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-    }
+    .metrics-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .metric-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 10px 8px;
-        text-align: center;
+        background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r);
+        padding: 8px; text-align: center;
     }
-    .metric-value { font-size: 1.3rem; font-weight: 800; }
-    .metric-label { font-size: 0.68rem; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .metric-card.red   .metric-value { color: var(--red); }
+    .metric-value { font-size: 1.2rem; font-weight: 800; }
+    .metric-label { font-size: .65rem; color: var(--text-3); margin-top: 2px; text-transform: uppercase; letter-spacing: .5px; }
+    .metric-card.red .metric-value { color: var(--red); }
     .metric-card.yellow .metric-value { color: var(--yellow); }
-    .metric-card.blue  .metric-value { color: var(--blue); }
+    .metric-card.blue .metric-value { color: var(--blue); }
 
-    .section-title {
-        font-size: 0.72rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: var(--text-muted);
-        margin-bottom: 6px;
-    }
+    .section-title { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--text-3); margin-bottom: 4px; }
 
     .issue-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 10px 12px;
-        border-left: 3px solid var(--border);
-        margin-bottom: 6px;
+        background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r);
+        padding: 8px 10px; border-left: 3px solid var(--border); margin-bottom: 4px;
     }
     .issue-card[data-severity="critical"] { border-left-color: var(--red); }
-    .issue-card[data-severity="warning"]  { border-left-color: var(--yellow); }
-    .issue-card[data-severity="info"]     { border-left-color: var(--blue); }
-
-    .issue-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 4px;
-    }
-    .issue-type {
-        font-size: 0.72rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    .issue-line {
-        font-family: var(--font-code);
-        font-size: 0.68rem;
-        color: var(--text-muted);
-        background: var(--bg-elevated);
-        padding: 1px 6px;
-        border-radius: 4px;
-    }
-    .issue-desc    { font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 4px; }
-    .issue-fix     { font-size: 0.75rem; color: var(--green); }
+    .issue-card[data-severity="warning"] { border-left-color: var(--yellow); }
+    .issue-card[data-severity="info"] { border-left-color: var(--blue); }
+    .issue-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+    .issue-type { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
+    .issue-line { font-family: var(--mono); font-size: .66rem; color: var(--text-3); background: var(--bg-3); padding: 1px 6px; border-radius: 4px; }
+    .issue-desc { font-size: .76rem; color: var(--text-2); margin-bottom: 3px; }
+    .issue-fix { font-size: .73rem; color: var(--green); }
 
     .positives-list { list-style: none; }
-    .positives-list li {
-        font-size: 0.78rem;
-        color: var(--text-secondary);
-        padding: 4px 0 4px 14px;
-        position: relative;
-    }
+    .positives-list li { font-size: .76rem; color: var(--text-2); padding: 3px 0 3px 14px; position: relative; }
     .positives-list li::before { content: "✓"; position: absolute; left: 0; color: var(--green); font-weight: 700; }
 
-    /* ── Week 2 Test Results ── */
-    .test-summary-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        padding: 14px;
-        display: flex;
-        align-items: center;
-        gap: 14px;
-    }
-    .test-count-circle {
-        width: 58px; height: 58px;
-        border-radius: 50%;
-        background: var(--blue);
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.4rem; font-weight: 800;
-        color: white; flex-shrink: 0;
-    }
-    .test-meta h2 { font-size: 0.95rem; font-weight: 700; }
-    .test-meta p  { font-size: 0.76rem; color: var(--text-secondary); margin-top: 2px; }
-    .test-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
-    .test-badge {
-        padding: 2px 8px;
-        border-radius: 20px;
-        font-size: 0.68rem;
-        font-weight: 700;
-    }
-    .badge-framework { background: var(--blue-dim);   color: var(--blue);   border: 1px solid #3b82f640; }
-    .badge-coverage  { background: var(--green-dim);  color: var(--green);  border: 1px solid #22c55e40; }
-    .badge-lang      { background: var(--purple-dim); color: var(--purple); border: 1px solid #a855f740; }
+    /* TEST RESULTS */
+    .test-summary-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 12px; display: flex; align-items: center; gap: 12px; }
+    .test-count-circle { width: 52px; height: 52px; border-radius: 50%; background: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 800; color: #fff; flex-shrink: 0; }
+    .test-meta h2 { font-size: .9rem; font-weight: 700; }
+    .test-meta p { font-size: .73rem; color: var(--text-2); margin-top: 2px; }
+    .test-badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+    .test-badge { padding: 2px 8px; border-radius: 20px; font-size: .65rem; font-weight: 700; }
+    .badge-framework { background: var(--blue-bg); color: var(--blue); border: 1px solid rgba(96,165,250,.25); }
+    .badge-coverage { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,.25); }
+    .badge-lang { background: var(--purple-bg); color: var(--purple); border: 1px solid rgba(192,132,252,.25); }
 
-    /* Coverage bar */
-    .coverage-bar-wrap {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 12px 14px;
-    }
-    .coverage-bar-label {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.75rem;
-        color: var(--text-secondary);
-        margin-bottom: 8px;
-    }
-    .coverage-pct { font-weight: 700; color: var(--text-primary); }
-    .coverage-bar-track {
-        height: 6px;
-        background: var(--bg-elevated);
-        border-radius: 3px;
-        overflow: hidden;
-    }
-    .coverage-bar-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--blue), var(--accent));
-        border-radius: 3px;
-        transition: width 0.6s ease;
-    }
+    .coverage-bar-wrap { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px; }
+    .coverage-bar-label { display: flex; justify-content: space-between; font-size: .73rem; color: var(--text-2); margin-bottom: 6px; }
+    .coverage-pct { font-weight: 700; color: var(--text-1); }
+    .coverage-bar-track { height: 6px; background: var(--bg-4); border-radius: 3px; overflow: hidden; }
+    .coverage-bar-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--accent)); border-radius: 3px; transition: width .6s; }
 
-    /* Breakdown pills */
-    .breakdown-row {
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-    }
-    .breakdown-pill {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 10px;
-        border-radius: var(--radius);
-        border: 1px solid var(--border);
-        background: var(--bg-card);
-        font-size: 0.75rem;
-    }
-    .breakdown-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .breakdown-pill span { color: var(--text-secondary); }
-    .breakdown-pill strong { color: var(--text-primary); }
+    .breakdown-row { display: flex; gap: 4px; flex-wrap: wrap; }
+    .breakdown-pill { display: flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: var(--r); border: 1px solid var(--border); background: var(--bg-2); font-size: .73rem; }
+    .breakdown-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .breakdown-pill span { color: var(--text-2); }
+    .breakdown-pill strong { color: var(--text-1); }
 
-    /* Test case cards */
     .test-case-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 10px 12px;
-        border-left: 3px solid var(--border);
-        margin-bottom: 6px;
-        cursor: pointer;
-        transition: border-color 0.15s, background 0.15s;
+        background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r);
+        padding: 8px 10px; border-left: 3px solid var(--border); margin-bottom: 4px;
+        cursor: pointer; transition: .15s;
     }
-    .test-case-card:hover { background: var(--bg-elevated); }
-    .test-case-card[data-type="happy_path"]  { border-left-color: var(--green); }
-    .test-case-card[data-type="edge_case"]   { border-left-color: var(--yellow); }
-    .test-case-card[data-type="error_case"]  { border-left-color: var(--red); }
-    .test-case-card[data-type="security"]    { border-left-color: var(--purple); }
+    .test-case-card:hover { background: var(--bg-3); }
+    .test-case-card[data-type="happy_path"] { border-left-color: var(--green); }
+    .test-case-card[data-type="edge_case"] { border-left-color: var(--yellow); }
+    .test-case-card[data-type="error_case"] { border-left-color: var(--red); }
+    .test-case-card[data-type="security"] { border-left-color: var(--purple); }
+    .test-case-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; margin-bottom: 3px; }
+    .test-case-name { font-family: var(--mono); font-size: .7rem; color: var(--text-1); word-break: break-all; }
+    .type-badge { font-size: .63rem; padding: 2px 6px; border-radius: 10px; white-space: nowrap; flex-shrink: 0; font-weight: 700; }
+    .type-happy_path { background: var(--green-bg); color: var(--green); }
+    .type-edge_case { background: var(--yellow-bg); color: var(--yellow); }
+    .type-error_case { background: var(--red-bg); color: var(--red); }
+    .type-security { background: var(--purple-bg); color: var(--purple); }
+    .test-case-desc { font-size: .73rem; color: var(--text-2); margin-bottom: 4px; }
+    .test-io-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .test-io-chip { background: var(--bg-3); border-radius: 4px; padding: 2px 6px; font-size: .68rem; color: var(--text-3); }
+    .test-io-chip em { color: var(--text-2); font-style: normal; }
 
-    .test-case-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 8px;
-        margin-bottom: 4px;
-    }
-    .test-case-name {
-        font-family: var(--font-code);
-        font-size: 0.72rem;
-        color: var(--text-primary);
-        word-break: break-all;
-        line-height: 1.4;
-    }
-    .type-badge {
-        font-size: 0.65rem;
-        padding: 2px 7px;
-        border-radius: 12px;
-        white-space: nowrap;
-        flex-shrink: 0;
-        font-weight: 700;
-    }
-    .type-happy_path { background: var(--green-dim);  color: var(--green); }
-    .type-edge_case  { background: var(--yellow-dim); color: var(--yellow); }
-    .type-error_case { background: var(--red-dim);    color: var(--red); }
-    .type-security   { background: var(--purple-dim); color: var(--purple); }
-
-    .test-case-desc { font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 6px; }
-    .test-io-row { display: flex; gap: 8px; flex-wrap: wrap; }
-    .test-io-chip {
-        background: var(--bg-elevated);
-        border-radius: var(--radius-sm);
-        padding: 2px 8px;
-        font-size: 0.7rem;
-        color: var(--text-muted);
-    }
-    .test-io-chip span { color: var(--text-muted); margin-right: 3px; }
-    .test-io-chip em   { color: var(--text-secondary); font-style: normal; }
-
-    /* Explain modal overlay */
+    /* EXPLAIN MODAL */
     .explain-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.7);
-        z-index: 200;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s;
+        position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 200;
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; pointer-events: none; transition: opacity .2s;
     }
     .explain-overlay.open { opacity: 1; pointer-events: all; }
     .explain-modal {
-        background: var(--bg-surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-xl);
-        width: 480px;
-        max-width: 90vw;
-        max-height: 80vh;
-        overflow-y: auto;
-        padding: 24px;
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-        box-shadow: var(--shadow-lg);
-        transform: translateY(10px);
-        transition: transform 0.2s;
+        background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-lg);
+        width: 460px; max-width: 90vw; max-height: 80vh; overflow-y: auto; padding: 20px;
+        display: flex; flex-direction: column; gap: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,.5); transform: translateY(10px); transition: transform .2s;
     }
     .explain-overlay.open .explain-modal { transform: translateY(0); }
-    .explain-modal h3 { font-size: 0.95rem; font-weight: 700; }
-    .explain-modal .explain-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
-    .explain-modal p { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6; }
+    .explain-modal h3 { font-size: .9rem; font-weight: 700; }
+    .explain-modal .explain-label { font-size: .66rem; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--text-3); }
+    .explain-modal p { font-size: .78rem; color: var(--text-2); line-height: 1.6; }
     .explain-close {
-        align-self: flex-end;
-        background: var(--bg-elevated);
-        border: 1px solid var(--border);
-        color: var(--text-secondary);
-        border-radius: var(--radius);
-        padding: 6px 14px;
-        cursor: pointer;
-        font-family: var(--font-ui);
-        font-size: 0.8rem;
+        align-self: flex-end; background: var(--bg-3); border: 1px solid var(--border);
+        color: var(--text-2); border-radius: var(--r); padding: 5px 12px;
+        cursor: pointer; font-family: var(--font); font-size: .76rem;
     }
 
-    /* Test file block */
-    .test-file-wrap {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        overflow: hidden;
-    }
+    /* TEST FILE */
+    .test-file-wrap { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
     .test-file-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 8px 12px;
-        background: var(--bg-elevated);
-        border-bottom: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 6px 10px; background: var(--bg-3); border-bottom: 1px solid var(--border);
     }
-    .test-file-title { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); }
+    .test-file-title { font-size: .73rem; font-weight: 600; color: var(--text-2); }
     .copy-btn {
-        background: var(--accent-dim);
-        border: 1px solid var(--accent-border);
-        color: var(--accent);
-        padding: 4px 12px;
-        border-radius: var(--radius-sm);
-        cursor: pointer;
-        font-family: var(--font-ui);
-        font-size: 0.72rem;
-        font-weight: 700;
-        transition: all 0.15s;
+        background: var(--accent-bg); border: 1px solid var(--accent-border); color: var(--accent);
+        padding: 3px 10px; border-radius: 4px; cursor: pointer; font-family: var(--font);
+        font-size: .7rem; font-weight: 700; transition: .15s;
     }
-    .copy-btn:hover { background: var(--accent); color: white; }
-    .copy-btn.copied { background: var(--green); border-color: var(--green); color: white; }
-
+    .copy-btn:hover { background: var(--accent); color: #fff; }
+    .copy-btn.copied { background: var(--green); border-color: var(--green); color: #fff; }
     .test-file-code {
-        font-family: var(--font-code);
-        font-size: 0.72rem;
-        line-height: 1.65;
-        padding: 14px;
-        max-height: 280px;
-        overflow-y: auto;
-        color: var(--text-primary);
-        white-space: pre;
-        background: #0d1117;
+        font-family: var(--mono); font-size: .7rem; line-height: 1.65; padding: 10px;
+        max-height: 260px; overflow-y: auto; color: var(--text-1); white-space: pre; background: #0d1117;
     }
 
-    /* Syntax check block */
-    .syntax-check-wrap {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 12px;
-    }
-    .syntax-check-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 0.8rem;
-    }
-    .syntax-dot {
-        width: 8px; height: 8px;
-        border-radius: 50%;
-        flex-shrink: 0;
-    }
-    .syntax-dot.ok      { background: var(--green); box-shadow: 0 0 6px var(--green); }
-    .syntax-dot.error   { background: var(--red);   box-shadow: 0 0 6px var(--red); }
+    .syntax-check-wrap { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r); padding: 10px; }
+    .syntax-check-row { display: flex; align-items: center; gap: 8px; font-size: .78rem; }
+    .syntax-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .syntax-dot.ok { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .syntax-dot.error { background: var(--red); box-shadow: 0 0 6px var(--red); }
     .syntax-dot.pending { background: var(--yellow); }
-    .syntax-message { color: var(--text-secondary); }
-    .syntax-warning { font-size: 0.72rem; color: var(--yellow); margin-top: 4px; padding-left: 16px; }
-    .syntax-error-msg { font-size: 0.72rem; color: var(--red); margin-top: 4px; padding-left: 16px; font-family: var(--font-code); }
+    .syntax-message { color: var(--text-2); }
+    .syntax-warning { font-size: .7rem; color: var(--yellow); margin-top: 3px; padding-left: 16px; }
+    .syntax-error-msg { font-size: .7rem; color: var(--red); margin-top: 3px; padding-left: 16px; font-family: var(--mono); }
 
-    /* Setup block */
-    .setup-block {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 12px 14px;
-    }
-    .setup-block pre {
-        font-family: var(--font-code);
-        font-size: 0.75rem;
-        color: var(--green);
-        white-space: pre-wrap;
-        line-height: 1.7;
-        margin-top: 6px;
-    }
+    .setup-block { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px; }
+    .setup-block pre { font-family: var(--mono); font-size: .73rem; color: var(--green); white-space: pre-wrap; line-height: 1.7; margin-top: 4px; }
 
-    /* Missing coverage block */
-    .missing-list li {
-        font-size: 0.75rem;
-        color: var(--text-secondary);
-        padding: 3px 0 3px 12px;
-        position: relative;
-    }
-    .missing-list li::before { content: "→"; position: absolute; left: 0; color: var(--text-muted); }
+    .missing-list li { font-size: .73rem; color: var(--text-2); padding: 2px 0 2px 12px; position: relative; }
+    .missing-list li::before { content: "→"; position: absolute; left: 0; color: var(--text-3); }
 
-    /* Detected functions chips */
-    .func-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-    .func-chip {
-        font-family: var(--font-code);
-        font-size: 0.68rem;
-        padding: 2px 8px;
-        background: var(--bg-elevated);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        color: var(--text-muted);
-    }
+    .func-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+    .func-chip { font-family: var(--mono); font-size: .66rem; padding: 2px 8px; background: var(--bg-3); border: 1px solid var(--border); border-radius: 4px; color: var(--text-3); }
 
-    /* Error banner */
     .error-banner {
-        background: var(--red-dim);
-        border: 1px solid #ef444440;
-        border-radius: var(--radius);
-        padding: 10px 12px;
-        font-size: 0.78rem;
-        color: var(--red);
-        display: none;
+        background: var(--red-bg); border: 1px solid rgba(248,113,113,.3); border-radius: var(--r);
+        padding: 8px 10px; font-size: .76rem; color: var(--red); display: none;
     }
     .error-banner.visible { display: block; }
 
-    /* Loading shimmer */
     .shimmer {
-        background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-elevated) 50%, var(--bg-card) 75%);
-        background-size: 200% 100%;
-        animation: shimmer 1.4s infinite;
-        border-radius: var(--radius);
-        height: 64px;
+        background: linear-gradient(90deg, var(--bg-2) 25%, var(--bg-3) 50%, var(--bg-2) 75%);
+        background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: var(--r); height: 60px;
     }
     @keyframes shimmer { to { background-position: -200% 0; } }
 
-    /* Section visibility */
+    /* SECTION VISIBILITY */
+    .app-section { display: none; }
     #reviewSection { display: grid; }
-    #testSection { display: none; }
-    #auditSection { display: none; }
-    #repoSection { display: none; }
-    #qaSection { display: none; }
-    #dastSection { display: none; }
-    #analyzeSection { display: none; }
-    #depsSection { display: none; }
-    #branchSection { display: none; }
-    #dashboardSection { display: none; }
 
-    /* Full-width section (no 3-col grid) */
+    /* FULL-WIDTH SECTIONS */
     .full-section {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
+        flex: 1; flex-direction: column; overflow: hidden;
     }
     .full-section .section-body {
-        flex: 1;
-        overflow-y: auto;
-        padding: 20px 28px;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
+        flex: 1; overflow-y: auto; padding: 16px 24px;
+        display: flex; flex-direction: column; gap: 14px;
     }
 
-    /* Repo URL input bar */
-    .url-input-bar {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-    }
-    .url-input-bar input {
-        flex: 1;
-        padding: 10px 14px;
-        font-size: 0.85rem;
-    }
-    .url-input-bar select {
-        width: 140px;
-        padding: 10px 12px;
-    }
-    .url-input-bar button {
-        padding: 10px 24px;
-        white-space: nowrap;
-    }
+    .url-input-bar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .url-input-bar input { flex: 1; padding: 8px 12px; font-size: .82rem; min-width: 200px; }
+    .url-input-bar select { width: 130px; padding: 8px 10px; }
+    .url-input-bar button { padding: 8px 20px; white-space: nowrap; }
 
-    /* Results grid cards */
-    .results-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 12px;
-    }
-    .result-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        padding: 16px;
-    }
-    .result-card h3 {
-        font-size: 0.85rem;
-        font-weight: 700;
-        margin-bottom: 8px;
-    }
-    .result-card p {
-        font-size: 0.78rem;
-        color: var(--text-secondary);
-        line-height: 1.5;
-    }
+    .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+    .result-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 14px; }
+    .result-card h3 { font-size: .82rem; font-weight: 700; margin-bottom: 6px; }
+    .result-card p { font-size: .76rem; color: var(--text-2); line-height: 1.5; }
 
-    /* Score radar / ring */
     .score-ring {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        border: 6px solid var(--border);
-        margin: 0 auto;
+        width: 110px; height: 110px; border-radius: 50%; display: flex;
+        align-items: center; justify-content: center; flex-direction: column;
+        border: 5px solid var(--border); margin: 0 auto;
     }
-    .score-ring .score-num {
-        font-size: 2rem;
-        font-weight: 800;
-    }
-    .score-ring .score-label {
-        font-size: 0.68rem;
-        color: var(--text-muted);
-        text-transform: uppercase;
-    }
+    .score-ring .score-num { font-size: 1.8rem; font-weight: 800; }
+    .score-ring .score-label { font-size: .65rem; color: var(--text-3); text-transform: uppercase; }
 
-    /* Score bars */
-    .score-bar-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 0.78rem;
-    }
-    .score-bar-row .bar-label {
-        width: 120px;
-        text-align: right;
-        color: var(--text-secondary);
-        font-weight: 600;
-    }
-    .score-bar-row .bar-track {
-        flex: 1;
-        height: 8px;
-        background: var(--bg-elevated);
-        border-radius: 4px;
-        overflow: hidden;
-    }
-    .score-bar-row .bar-fill {
-        height: 100%;
-        border-radius: 4px;
-        transition: width 0.6s ease;
-    }
-    .score-bar-row .bar-value {
-        width: 36px;
-        font-weight: 700;
-        color: var(--text-primary);
-    }
+    .score-bar-row { display: flex; align-items: center; gap: 8px; font-size: .76rem; }
+    .score-bar-row .bar-label { width: 110px; text-align: right; color: var(--text-2); font-weight: 600; }
+    .score-bar-row .bar-track { flex: 1; height: 7px; background: var(--bg-4); border-radius: 4px; overflow: hidden; }
+    .score-bar-row .bar-fill { height: 100%; border-radius: 4px; transition: width .6s; }
+    .score-bar-row .bar-value { width: 32px; font-weight: 700; }
 
-    /* File list table */
-    .file-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.76rem;
-    }
-    .file-table th {
-        text-align: left;
-        padding: 8px 10px;
-        background: var(--bg-elevated);
-        color: var(--text-muted);
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 0.68rem;
-    }
-    .file-table td {
-        padding: 6px 10px;
-        border-bottom: 1px solid var(--border-subtle);
-        color: var(--text-secondary);
-    }
-    .file-table tr:hover td {
-        background: var(--bg-elevated);
-    }
+    .file-table { width: 100%; border-collapse: collapse; font-size: .73rem; }
+    .file-table th { text-align: left; padding: 6px 8px; background: var(--bg-3); color: var(--text-3); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; font-size: .66rem; }
+    .file-table td { padding: 5px 8px; border-bottom: 1px solid var(--border); color: var(--text-2); }
+    .file-table tr:hover td { background: var(--bg-3); }
 
-    /* Framework/dep chips */
     .fw-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        padding: 3px 10px;
-        border-radius: 20px;
-        border: 1px solid var(--border);
-        background: var(--bg-elevated);
-        font-size: 0.72rem;
-        font-weight: 600;
-        color: var(--text-secondary);
-        margin: 2px;
+        display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
+        border-radius: 20px; border: 1px solid var(--border); background: var(--bg-3);
+        font-size: .7rem; font-weight: 600; color: var(--text-2); margin: 2px;
     }
+    .verdict-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: .78rem; font-weight: 800; letter-spacing: .3px; }
+    .verdict-SAFE_TO_MERGE { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,.25); }
+    .verdict-NEEDS_REVIEW { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(251,191,36,.25); }
+    .verdict-BLOCK_MERGE { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,.25); }
 
-    /* Verdict badge */
-    .verdict-badge {
-        display: inline-block;
-        padding: 4px 16px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 800;
-        letter-spacing: 0.5px;
-    }
-    .verdict-SAFE_TO_MERGE { background: var(--green-dim); color: var(--green); border: 1px solid #22c55e40; }
-    .verdict-NEEDS_REVIEW { background: var(--yellow-dim); color: var(--yellow); border: 1px solid #eab30840; }
-    .verdict-BLOCK_MERGE { background: var(--red-dim); color: var(--red); border: 1px solid #ef444440; }
-
-    .week-tabs { flex-wrap: wrap; }
-
-    /* Scrollbar styling */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-
-    /* Utility */
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
     .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════ NAVBAR ═══ -->
 <nav class="navbar">
     <div class="logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
         Autopsy AI
-        <span class="badge" id="moduleBadge">Code Reviewer</span>
+        <span class="module-badge" id="moduleBadge">Code Review</span>
     </div>
     <div class="nav-right">
         <button class="icon-btn" id="themeToggle">☀ Light</button>
     </div>
 </nav>
 
-<!-- ═══════════════════════════════════════ TABS ═══ -->
-<div class="week-tabs">
-    <button class="week-tab active" id="tabReview" onclick="switchTab('review')">📋 Code Review</button>
-    <button class="week-tab"        id="tabTest" onclick="switchTab('test')">🧪 Test Generator</button>
-    <button class="week-tab"        id="tabAudit" onclick="switchTab('audit')">🛡️ Security Audit</button>
-    <button class="week-tab"        id="tabRepo" onclick="switchTab('repo')">🔍 Repo Intel</button>
-    <button class="week-tab"        id="tabQa" onclick="switchTab('qa')">🧬 QA Scanner</button>
-    <button class="week-tab"        id="tabDast" onclick="switchTab('dast')">💥 DAST</button>
-    <button class="week-tab"        id="tabAnalyze" onclick="switchTab('analyze')">📐 Code Metrics</button>
-    <button class="week-tab"        id="tabDeps" onclick="switchTab('deps')">📦 Dependencies</button>
-    <button class="week-tab"        id="tabBranch" onclick="switchTab('branch')">🔀 Branch Compare</button>
-    <button class="week-tab"        id="tabDashboard" onclick="switchTab('dashboard')">📊 Dashboard</button>
+<div class="tab-bar">
+    <button class="tab-btn active" data-tab="review">📋 Review</button>
+    <button class="tab-btn" data-tab="test">🧪 Tests</button>
+    <button class="tab-btn" data-tab="audit">🛡️ Security</button>
+    <button class="tab-btn" data-tab="repo">🔍 Repo Intel</button>
+    <button class="tab-btn" data-tab="qa">🧬 QA Scanner</button>
+    <button class="tab-btn" data-tab="dast">💥 DAST</button>
+    <button class="tab-btn" data-tab="analyze">📐 Metrics</button>
+    <button class="tab-btn" data-tab="deps">📦 Deps</button>
+    <button class="tab-btn" data-tab="branch">🔀 Branch</button>
+    <button class="tab-btn" data-tab="dashboard">📊 Dashboard</button>
 </div>
 
-
-<!-- ═══════════════════════════════════════════════════════ -->
-<!--  CODE REVIEWER                               -->
-<!-- ═══════════════════════════════════════════════════════ -->
-<main class="dashboard" id="reviewSection">
-
-    <!-- Sidebar -->
+<!-- CODE REVIEW -->
+<main class="panel-grid app-section" id="reviewSection">
     <aside class="sidebar">
         <div class="sidebar-header">Submit Code</div>
-        <div class="input-section">
-            <label for="languageSelect">Language</label>
+        <div class="input-area">
+            <label>Language</label>
             <select id="languageSelect">
                 <option value="python">Python</option>
                 <option value="javascript">JavaScript</option>
                 <option value="typescript">TypeScript</option>
-                <option value="html">HTML</option>
-                <option value="css">CSS</option>
                 <option value="java">Java</option>
                 <option value="cpp">C++</option>
             </select>
-
-            <label for="codeInput">Source Code</label>
-            <textarea id="codeInput" style="flex:1; min-height:220px;" placeholder="Paste your code here...">def process_user(u):
+            <label>Source Code</label>
+            <textarea id="codeInput" placeholder="Paste your code here...">def process_user(u):
     x = 10
     if u == 1:
         if x > 5:
@@ -1057,7 +453,6 @@
                 print(i)
                 print(i)
     return u</textarea>
-
             <div id="w1ErrorBanner" class="error-banner"></div>
             <button id="analyzeBtn" class="primary-btn">
                 <span class="btn-text">Audit Code</span>
@@ -1065,41 +460,23 @@
             </button>
         </div>
     </aside>
-
-    <!-- Middle: Code viewer -->
     <section class="code-pane">
-        <div class="pane-header">
-            <span>Code Viewer</span>
-            <span class="file-chip" id="fileNameDisplay">untitled.py</span>
-        </div>
-        <div class="code-scroll">
-            <pre><code id="codeDisplay" class="language-python"></code></pre>
-        </div>
+        <div class="pane-header"><span>Code Viewer</span><span class="file-chip" id="fileNameDisplay">untitled.py</span></div>
+        <div class="code-scroll"><pre><code id="codeDisplay" class="language-python"></code></pre></div>
     </section>
-
-    <!-- Right: Results -->
     <aside class="results-panel">
-        <div class="pane-header"><span>AI Review Summary</span></div>
+        <div class="pane-header"><span>AI Review</span></div>
         <div class="results-scroll" id="w1Results">
-            <div class="empty-state" id="w1EmptyState">
-                <div class="empty-icon">🤖</div>
-                <p>Paste code on the left and click Audit Code</p>
-            </div>
+            <div class="empty-state" id="w1EmptyState"><div class="empty-icon">🤖</div><p>Paste code and click Audit Code</p></div>
         </div>
     </aside>
 </main>
 
-
-<!-- ═══════════════════════════════════════════════════════ -->
-<!--  TEST GENERATOR                              -->
-<!-- ═══════════════════════════════════════════════════════ -->
-<main class="dashboard" id="testSection">
-
-    <!-- Sidebar -->
+<!-- TEST GENERATOR -->
+<main class="panel-grid app-section" id="testSection">
     <aside class="sidebar">
         <div class="sidebar-header">Generate Tests</div>
-        <div class="input-section">
-
+        <div class="input-area">
             <label>Language</label>
             <select id="testLanguageSelect">
                 <option value="python">Python → pytest</option>
@@ -1107,32 +484,21 @@
                 <option value="typescript">TypeScript → Jest+ts</option>
                 <option value="java">Java → JUnit 5</option>
             </select>
-
-            <label>Function Name <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+            <label>Function Name <span style="color:var(--text-3);font-weight:400">(optional)</span></label>
             <input type="text" id="functionNameInput" placeholder="e.g. calculate_total">
-
             <label>Test Depth</label>
             <div class="depth-pills">
-                <button class="depth-pill" data-depth="quick">Quick<br><span style="font-weight:400;color:var(--text-muted)">~5</span></button>
-                <button class="depth-pill active" data-depth="standard">Standard<br><span style="font-weight:400;color:var(--text-muted)">~10</span></button>
-                <button class="depth-pill" data-depth="thorough">Thorough<br><span style="font-weight:400;color:var(--text-muted)">15+</span></button>
+                <button class="depth-pill" data-depth="quick">Quick ~5</button>
+                <button class="depth-pill active" data-depth="standard">Standard ~10</button>
+                <button class="depth-pill" data-depth="thorough">Thorough 15+</button>
             </div>
-
-            <div class="toggle-row">
-                <span>Include mocks/patches</span>
-                <label class="toggle"><input type="checkbox" id="includeMocks" checked><span class="toggle-slider"></span></label>
-            </div>
-            <div class="toggle-row">
-                <span>Include fixtures</span>
-                <label class="toggle"><input type="checkbox" id="includeFixtures" checked><span class="toggle-slider"></span></label>
-            </div>
-
+            <div class="toggle-row"><span>Include mocks</span><label class="toggle"><input type="checkbox" id="includeMocks" checked><span class="toggle-slider"></span></label></div>
+            <div class="toggle-row"><span>Include fixtures</span><label class="toggle"><input type="checkbox" id="includeFixtures" checked><span class="toggle-slider"></span></label></div>
             <label>Source Code</label>
-            <textarea id="testCodeInput" style="flex:1; min-height:180px;" placeholder="Paste the code you want tests for...">def calculate_discount(price, discount_pct):
+            <textarea id="testCodeInput" placeholder="Paste code you want tests for...">def calculate_discount(price, discount_pct):
     if discount_pct < 0 or discount_pct > 100:
         raise ValueError("Discount must be 0-100")
     return price * (1 - discount_pct / 100)</textarea>
-
             <div id="w2ErrorBanner" class="error-banner"></div>
             <button id="generateTestBtn" class="primary-btn">
                 <span class="btn-text-test">Generate Tests</span>
@@ -1140,52 +506,32 @@
             </button>
         </div>
     </aside>
-
-    <!-- Middle: Code viewer -->
     <section class="code-pane">
-        <div class="pane-header">
-            <span>Code Being Tested</span>
-            <span class="file-chip" id="testFileNameDisplay">untitled.py</span>
-        </div>
-        <div class="code-scroll">
-            <pre><code id="testCodeDisplay" class="language-python"></code></pre>
-        </div>
+        <div class="pane-header"><span>Code Being Tested</span><span class="file-chip" id="testFileNameDisplay">untitled.py</span></div>
+        <div class="code-scroll"><pre><code id="testCodeDisplay" class="language-python"></code></pre></div>
     </section>
-
-    <!-- Right: Test Results -->
     <aside class="results-panel">
-        <div class="pane-header"><span>Generated Test Suite</span></div>
+        <div class="pane-header"><span>Generated Tests</span></div>
         <div class="results-scroll" id="w2Results">
-            <div class="empty-state" id="w2EmptyState">
-                <div class="empty-icon">🧪</div>
-                <p>Paste code on the left and click Generate Tests</p>
-            </div>
+            <div class="empty-state" id="w2EmptyState"><div class="empty-icon">🧪</div><p>Paste code and click Generate Tests</p></div>
         </div>
     </aside>
 </main>
 
-<!-- ═══════════════════════════════════════════════════════ -->
-<!--  SECURITY AUDIT                              -->
-<!-- ═══════════════════════════════════════════════════════ -->
-<main class="dashboard" id="auditSection">
-
-    <!-- Sidebar -->
+<!-- SECURITY AUDIT -->
+<main class="panel-grid app-section" id="auditSection">
     <aside class="sidebar">
         <div class="sidebar-header">Security Scan</div>
-        <div class="input-section">
-
+        <div class="input-area">
             <label>Language</label>
             <select id="auditLanguageSelect">
                 <option value="python">Python</option>
                 <option value="javascript">JavaScript</option>
                 <option value="typescript">TypeScript</option>
                 <option value="java">Java</option>
-                <option value="cpp">C++</option>
             </select>
-
             <label>Source Code</label>
-            <textarea id="auditCodeInput" style="flex:1; min-height:180px;" placeholder="Paste code to scan for OWASP vulnerabilities..."></textarea>
-
+            <textarea id="auditCodeInput" placeholder="Paste code to scan for vulnerabilities..."></textarea>
             <div id="auditErrorBanner" class="error-banner"></div>
             <button id="runAuditBtn" class="primary-btn" style="background:var(--purple);">
                 <span class="btn-text-audit">Run Security Scan</span>
@@ -1193,237 +539,137 @@
             </button>
         </div>
     </aside>
-
-    <!-- Middle: Code viewer -->
     <section class="code-pane">
-        <div class="pane-header">
-            <span>Code To Audit</span>
-            <span class="file-chip" id="auditFileNameDisplay">untitled.py</span>
-        </div>
-        <div class="code-scroll">
-            <pre><code id="auditCodeDisplay" class="language-python"></code></pre>
-        </div>
+        <div class="pane-header"><span>Code To Audit</span><span class="file-chip" id="auditFileNameDisplay">untitled.py</span></div>
+        <div class="code-scroll"><pre><code id="auditCodeDisplay" class="language-python"></code></pre></div>
     </section>
-
-    <!-- Right: Audit Results -->
     <aside class="results-panel">
-        <div class="pane-header"><span>Security Posture Dashboard</span></div>
+        <div class="pane-header"><span>Security Report</span></div>
         <div class="results-scroll" id="auditResults">
-            <div class="empty-state" id="auditEmptyState">
-                <div class="empty-icon" style="filter:none;">🛡️</div>
-                <p>Paste code on the left and click Run Security Scan</p>
-            </div>
+            <div class="empty-state" id="auditEmptyState"><div class="empty-icon">🛡️</div><p>Paste code and click Run Security Scan</p></div>
         </div>
     </aside>
 </main>
 
-
-<!-- ═══════════════════════════════════════════════════════ -->
-<!--  REPO INTELLIGENCE                                    -->
-<!-- ═══════════════════════════════════════════════════════ -->
-<main class="full-section" id="repoSection">
-    <div class="pane-header">
-        <span>GitHub Repository Intelligence</span>
-        <span class="badge">AI Analysis</span>
-    </div>
+<!-- REPO INTELLIGENCE -->
+<main class="full-section app-section" id="repoSection">
+    <div class="pane-header"><span>GitHub Repository Intelligence</span><span class="module-badge">AI Analysis</span></div>
     <div class="section-body">
         <div class="url-input-bar">
-            <input type="text" id="repoUrlInput" placeholder="https://github.com/owner/repo" style="font-family:var(--font-code);">
-            <input type="text" id="repoBranchInput" placeholder="Branch" value="main" style="width:120px;font-family:var(--font-code);">
-            <button class="primary-btn" id="analyzeRepoBtn" style="width:auto;">
-                <span class="btn-text-repo">Analyze Repository</span>
-                <span class="spinner" id="repoSpinner"></span>
-            </button>
+            <input type="text" id="repoUrlInput" placeholder="https://github.com/owner/repo" style="font-family:var(--mono)">
+            <input type="text" id="repoBranchInput" placeholder="Branch" value="main" style="width:110px;font-family:var(--mono)">
+            <button class="primary-btn" id="analyzeRepoBtn" style="width:auto"><span class="btn-text-repo">Analyze Repo</span><span class="spinner" id="repoSpinner"></span></button>
         </div>
         <div id="repoErrorBanner" class="error-banner"></div>
-        <div id="repoResults">
-            <div class="empty-state">
-                <div class="empty-icon">🔍</div>
-                <p>Enter a GitHub repository URL above and click Analyze</p>
-            </div>
-        </div>
+        <div id="repoResults"><div class="empty-state"><div class="empty-icon">🔍</div><p>Enter a GitHub repo URL and click Analyze</p></div></div>
     </div>
 </main>
 
-<!-- ═══════════════════════════════════════════════════════ -->
-<!--  REPO QA SCANNER                                       -->
-<!-- ═══════════════════════════════════════════════════════ -->
-<main class="full-section" id="qaSection">
-    <div class="pane-header"><span>Repo-Level QA Scanner</span><span class="badge">Test Coverage Map</span></div>
+<!-- QA SCANNER -->
+<main class="full-section app-section" id="qaSection">
+    <div class="pane-header"><span>QA Scanner</span><span class="module-badge">Test Coverage</span></div>
     <div class="section-body">
         <div class="url-input-bar">
-            <input type="text" id="qaRepoUrl" placeholder="https://github.com/owner/repo" style="font-family:var(--font-code);">
-            <input type="text" id="qaBranch" placeholder="Branch" value="main" style="width:120px;font-family:var(--font-code);">
-            <label class="toggle" style="margin:0 8px;" title="Auto-generate tests for uncovered files">
-                <input type="checkbox" id="qaAutoGenerate">
-                <span class="toggle-slider"></span>
-            </label>
-            <span style="font-size:0.75rem;color:var(--text-muted);white-space:nowrap;">Auto-gen</span>
-            <button class="primary-btn" id="scanQaBtn" style="width:auto;">
-                <span class="btn-text-qa">Scan Test Coverage</span>
-                <span class="spinner" id="qaSpinner"></span>
-            </button>
+            <input type="text" id="qaRepoUrl" placeholder="https://github.com/owner/repo" style="font-family:var(--mono)">
+            <input type="text" id="qaBranch" placeholder="Branch" value="main" style="width:110px;font-family:var(--mono)">
+            <label class="toggle" style="margin:0 6px" title="Auto-generate tests"><input type="checkbox" id="qaAutoGenerate"><span class="toggle-slider"></span></label>
+            <span style="font-size:.72rem;color:var(--text-3);white-space:nowrap">Auto-gen</span>
+            <button class="primary-btn" id="scanQaBtn" style="width:auto"><span class="btn-text-qa">Scan Coverage</span><span class="spinner" id="qaSpinner"></span></button>
         </div>
         <div id="qaErrorBanner" class="error-banner"></div>
-        <div id="qaResults"><div class="empty-state"><div class="empty-icon">🧬</div><p>Enter a repo URL to scan for missing and empty test files</p></div></div>
+        <div id="qaResults"><div class="empty-state"><div class="empty-icon">🧬</div><p>Enter a repo URL to scan test coverage</p></div></div>
     </div>
 </main>
 
-<!-- ═══════════════════════════════════════════════════════ -->
-<!--  DAST SIMULATOR                                        -->
-<!-- ═══════════════════════════════════════════════════════ -->
-<main class="full-section" id="dastSection">
-    <div class="pane-header"><span>Simulated DAST</span><span class="badge">Penetration Testing</span></div>
+<!-- DAST -->
+<main class="full-section app-section" id="dastSection">
+    <div class="pane-header"><span>Simulated DAST</span><span class="module-badge">Pen Testing</span></div>
     <div class="section-body">
-        <div style="display:flex;gap:10px;align-items:flex-end;">
-            <div style="flex:0 0 140px;"><label>Language</label>
+        <div style="display:flex;gap:8px;align-items:flex-end">
+            <div style="flex:0 0 130px"><label>Language</label>
                 <select id="dastLangSelect"><option value="python">Python</option><option value="javascript">JavaScript</option><option value="typescript">TypeScript</option><option value="java">Java</option></select>
             </div>
-            <button class="primary-btn" id="runDastBtn" style="width:auto;margin-top:0;background:var(--orange);">
-                <span class="btn-text-dast">Discover & Attack</span>
-                <span class="spinner" id="dastSpinner"></span>
-            </button>
+            <button class="primary-btn" id="runDastBtn" style="width:auto;margin-top:0;background:var(--orange)"><span class="btn-text-dast">Discover & Attack</span><span class="spinner" id="dastSpinner"></span></button>
         </div>
-        <textarea id="dastCodeInput" style="min-height:200px;max-height:300px;" placeholder="Paste your API/server code here (Flask, FastAPI, Express, etc.)..."></textarea>
+        <textarea id="dastCodeInput" style="min-height:180px;max-height:280px" placeholder="Paste your API/server code (Flask, FastAPI, Express, etc.)..."></textarea>
         <div id="dastErrorBanner" class="error-banner"></div>
-        <div id="dastResults"><div class="empty-state"><div class="empty-icon">💥</div><p>Paste your server/API code to discover endpoints and simulate attacks</p></div></div>
+        <div id="dastResults"><div class="empty-state"><div class="empty-icon">💥</div><p>Paste server code to discover endpoints and simulate attacks</p></div></div>
     </div>
 </main>
 
-<!-- ═══════════════════════════════════════════════════════ -->
-<!--  CODE METRICS / ANALYSIS                               -->
-<!-- ═══════════════════════════════════════════════════════ -->
-<main class="full-section" id="analyzeSection">
-    <div class="pane-header"><span>Code Metrics &amp; Analysis</span><span class="badge">Real Metrics</span></div>
+<!-- CODE METRICS -->
+<main class="full-section app-section" id="analyzeSection">
+    <div class="pane-header"><span>Code Metrics & Analysis</span><span class="module-badge">Real Metrics</span></div>
     <div class="section-body">
-        <div style="display:flex;gap:10px;align-items:flex-end;">
-            <div style="flex:0 0 140px;"><label>Language</label>
+        <div style="display:flex;gap:8px;align-items:flex-end">
+            <div style="flex:0 0 130px"><label>Language</label>
                 <select id="analyzeLangSelect"><option value="python">Python</option><option value="javascript">JavaScript</option><option value="typescript">TypeScript</option></select>
             </div>
-            <button class="primary-btn" id="runAnalyzeBtn" style="width:auto;margin-top:0;">
-                <span class="btn-text-analyze">Full Analysis</span>
-                <span class="spinner" id="analyzeSpinner"></span>
-            </button>
+            <button class="primary-btn" id="runAnalyzeBtn" style="width:auto;margin-top:0"><span class="btn-text-analyze">Full Analysis</span><span class="spinner" id="analyzeSpinner"></span></button>
         </div>
-        <textarea id="analyzeCodeInput" style="min-height:200px;max-height:300px;" placeholder="Paste code for metrics analysis (complexity, dead code, duplication, linting)..."></textarea>
+        <textarea id="analyzeCodeInput" style="min-height:180px;max-height:280px" placeholder="Paste code for metrics analysis..."></textarea>
         <div id="analyzeErrorBanner" class="error-banner"></div>
-        <div id="analyzeResults"><div class="empty-state"><div class="empty-icon">📐</div><p>Paste code above for real cyclomatic complexity, dead code detection, and linting</p></div></div>
+        <div id="analyzeResults"><div class="empty-state"><div class="empty-icon">📐</div><p>Paste code for complexity, dead code, and linting analysis</p></div></div>
     </div>
 </main>
 
-<!-- ═══════════════════════════════════════════════════════ -->
-<!--  DEPENDENCY SCANNER                                    -->
-<!-- ═══════════════════════════════════════════════════════ -->
-<main class="full-section" id="depsSection">
-    <div class="pane-header">
-        <span>Dependency Intelligence</span>
-        <span class="badge">CVE Scanner</span>
-    </div>
+<!-- DEPENDENCIES -->
+<main class="full-section app-section" id="depsSection">
+    <div class="pane-header"><span>Dependency Intelligence</span><span class="module-badge">CVE Scanner</span></div>
     <div class="section-body">
-        <div style="display:flex;gap:10px;align-items:flex-end;">
-            <div style="flex:1;">
-                <label>Manifest Type</label>
-                <select id="depsManifestType">
-                    <option value="auto">Auto-detect</option>
-                    <option value="package.json">package.json (npm)</option>
-                    <option value="requirements.txt">requirements.txt (Python)</option>
-                    <option value="go.mod">go.mod (Go)</option>
-                </select>
+        <div style="display:flex;gap:8px;align-items:flex-end">
+            <div style="flex:1"><label>Manifest Type</label>
+                <select id="depsManifestType"><option value="auto">Auto-detect</option><option value="package.json">package.json</option><option value="requirements.txt">requirements.txt</option><option value="go.mod">go.mod</option></select>
             </div>
-            <button class="primary-btn" id="scanDepsBtn" style="width:auto;margin-top:0;padding:10px 24px;">
-                <span class="btn-text-deps">Scan Dependencies</span>
-                <span class="spinner" id="depsSpinner"></span>
-            </button>
+            <button class="primary-btn" id="scanDepsBtn" style="width:auto;margin-top:0;padding:8px 20px"><span class="btn-text-deps">Scan Deps</span><span class="spinner" id="depsSpinner"></span></button>
         </div>
-        <textarea id="depsManifestInput" style="min-height:200px;max-height:300px;" placeholder="Paste your package.json, requirements.txt, or go.mod content here..."></textarea>
+        <textarea id="depsManifestInput" style="min-height:180px;max-height:280px" placeholder="Paste your package.json, requirements.txt, or go.mod content..."></textarea>
         <div id="depsErrorBanner" class="error-banner"></div>
-        <div id="depsResults">
-            <div class="empty-state">
-                <div class="empty-icon">📦</div>
-                <p>Paste your dependency manifest above and click Scan</p>
-            </div>
-        </div>
+        <div id="depsResults"><div class="empty-state"><div class="empty-icon">📦</div><p>Paste dependency manifest and click Scan</p></div></div>
     </div>
 </main>
 
-<!-- ═══════════════════════════════════════════════════════ -->
-<!--  BRANCH COMPARE                                        -->
-<!-- ═══════════════════════════════════════════════════════ -->
-<main class="full-section" id="branchSection">
-    <div class="pane-header">
-        <span>Branch-Level Intelligence</span>
-        <span class="badge">Diff Analysis</span>
-    </div>
+<!-- BRANCH COMPARE -->
+<main class="full-section app-section" id="branchSection">
+    <div class="pane-header"><span>Branch Comparison</span><span class="module-badge">Diff Analysis</span></div>
     <div class="section-body">
         <div class="url-input-bar">
-            <input type="text" id="branchRepoUrl" placeholder="https://github.com/owner/repo" style="font-family:var(--font-code);flex:2;">
-            <input type="text" id="baseBranchInput" placeholder="Base: main" value="main" style="width:120px;font-family:var(--font-code);">
-            <input type="text" id="headBranchInput" placeholder="Head: feature" style="width:140px;font-family:var(--font-code);">
-            <button class="primary-btn" id="compareBranchBtn" style="width:auto;">
-                <span class="btn-text-branch">Compare Branches</span>
-                <span class="spinner" id="branchSpinner"></span>
-            </button>
+            <input type="text" id="branchRepoUrl" placeholder="https://github.com/owner/repo" style="font-family:var(--mono);flex:2">
+            <input type="text" id="baseBranchInput" placeholder="Base: main" value="main" style="width:110px;font-family:var(--mono)">
+            <input type="text" id="headBranchInput" placeholder="Head branch" style="width:130px;font-family:var(--mono)">
+            <button class="primary-btn" id="compareBranchBtn" style="width:auto"><span class="btn-text-branch">Compare</span><span class="spinner" id="branchSpinner"></span></button>
         </div>
         <div id="branchErrorBanner" class="error-banner"></div>
-        <div id="branchResults">
-            <div class="empty-state">
-                <div class="empty-icon">🔀</div>
-                <p>Enter repo URL and two branch names to compare</p>
-            </div>
-        </div>
+        <div id="branchResults"><div class="empty-state"><div class="empty-icon">🔀</div><p>Enter repo URL and two branches to compare</p></div></div>
     </div>
 </main>
 
-<!-- ═══════════════════════════════════════════════════════ -->
-<!--  HEALTH DASHBOARD                                      -->
-<!-- ═══════════════════════════════════════════════════════ -->
-<main class="full-section" id="dashboardSection">
-    <div class="pane-header">
-        <span>Code Health Dashboard</span>
-        <span class="badge">Full Analysis</span>
-    </div>
+<!-- DASHBOARD -->
+<main class="full-section app-section" id="dashboardSection">
+    <div class="pane-header"><span>Code Health Dashboard</span><span class="module-badge">Full Analysis</span></div>
     <div class="section-body">
         <div class="url-input-bar">
-            <input type="text" id="dashboardRepoUrl" placeholder="https://github.com/owner/repo" style="font-family:var(--font-code);">
-            <input type="text" id="dashboardBranchInput" placeholder="Branch" value="main" style="width:120px;font-family:var(--font-code);">
-            <button class="primary-btn" id="generateDashboardBtn" style="width:auto;background:linear-gradient(135deg, var(--accent), var(--purple));">
-                <span class="btn-text-dashboard">Generate Dashboard</span>
-                <span class="spinner" id="dashboardSpinner"></span>
-            </button>
+            <input type="text" id="dashboardRepoUrl" placeholder="https://github.com/owner/repo" style="font-family:var(--mono)">
+            <input type="text" id="dashboardBranchInput" placeholder="Branch" value="main" style="width:110px;font-family:var(--mono)">
+            <button class="primary-btn" id="generateDashboardBtn" style="width:auto;background:linear-gradient(135deg,var(--accent),var(--purple))"><span class="btn-text-dashboard">Generate Dashboard</span><span class="spinner" id="dashboardSpinner"></span></button>
         </div>
         <div id="dashboardErrorBanner" class="error-banner"></div>
-        <div id="dashboardResults">
-            <div class="empty-state">
-                <div class="empty-icon">📊</div>
-                <p>Enter a GitHub repo URL to generate a full code health dashboard</p>
-            </div>
-        </div>
+        <div id="dashboardResults"><div class="empty-state"><div class="empty-icon">📊</div><p>Enter a repo URL to generate a health dashboard</p></div></div>
     </div>
 </main>
 
-
-<!-- Explain modal -->
+<!-- EXPLAIN MODAL -->
 <div class="explain-overlay" id="explainOverlay">
     <div class="explain-modal" id="explainModal">
         <h3 id="explainTitle">Test Explanation</h3>
-        <div>
-            <div class="explain-label">What it does</div>
-            <p id="explainOneLiner"></p>
-        </div>
-        <div>
-            <div class="explain-label">Why it matters</div>
-            <p id="explainWhy"></p>
-        </div>
-        <div>
-            <div class="explain-label">How to make it pass</div>
-            <p id="explainHow"></p>
-        </div>
+        <div><div class="explain-label">What it does</div><p id="explainOneLiner"></p></div>
+        <div><div class="explain-label">Why it matters</div><p id="explainWhy"></p></div>
+        <div><div class="explain-label">How to make it pass</div><p id="explainHow"></p></div>
         <button class="explain-close" onclick="closeExplainModal()">Close</button>
     </div>
 </div>
 
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-<script src="app.js"></script>
+<script src="/static/app.js"></script>
 </body>
 </html>
